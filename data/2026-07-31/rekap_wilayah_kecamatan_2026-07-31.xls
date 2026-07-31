@@ -1,0 +1,394 @@
+﻿<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Rekap Wilayah</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+    <body>
+    <h2>Rekapitulasi Progres per Wilayah (Kecamatan)</h2>
+    <table border="1">
+      <thead>
+        <tr style="background-color: #0d9488; color: #ffffff; font-weight: bold; text-align: center;">
+          <th rowspan="2">No</th>
+          <th rowspan="2">Kode Wilayah</th>
+          <th rowspan="2">Nama Wilayah</th>
+          <th colspan="6" style="background-color: #115e59;">PROGRES PENDATAAN</th>
+          <th colspan="4" style="background-color: #1e3a8a;">USAHA PERUSAHAAN BKU</th>
+          <th colspan="4" style="background-color: #064e3b;">USAHA KELUARGA</th>
+        </tr>
+        <tr style="background-color: #0f766e; color: #ffffff; font-weight: bold; text-align: center;">
+          <th>Target Prelist</th>
+          <th>Responden Didata</th>
+          <th>+ Didata (Harian)</th>
+          <th>% Didata</th>
+          <th>Didata + Draft</th>
+          <th>% (Didata + Draft)</th>
+          
+          <th>BKU Prelist</th>
+          <th>BKU Ditemukan</th>
+          <th>BKU Baru</th>
+          <th>Total BKU</th>
+
+          <th>Keluarga Ditemukan</th>
+          <th>Keluarga Baru</th>
+          <th>Keluarga Tutup</th>
+          <th>Total Usaha Keluarga</th>
+        </tr>
+      </thead>
+      <tbody><tr>
+        <td style="text-align: center;">1</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402000</td>
+        <td>TIDAK DIKETAHUI</td>
+        <td style="text-align: right;">3</td>
+        <td style="text-align: right;">4</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">133.33%</td>
+        <td style="text-align: right;">5</td>
+        <td style="text-align: right;">166.67%</td>
+        
+        <td style="text-align: right;">3</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+      </tr><tr>
+        <td style="text-align: center;">2</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402010</td>
+        <td>SRANDAKAN</td>
+        <td style="text-align: right;">16373</td>
+        <td style="text-align: right;">10712</td>
+        <td style="text-align: right;">167</td>
+        <td style="text-align: right;">65.42%</td>
+        <td style="text-align: right;">10730</td>
+        <td style="text-align: right;">65.53%</td>
+        
+        <td style="text-align: right;">5713</td>
+        <td style="text-align: right;">175</td>
+        <td style="text-align: right;">436</td>
+        <td style="text-align: right;">611</td>
+
+        <td style="text-align: right;">2286</td>
+        <td style="text-align: right;">2883</td>
+        <td style="text-align: right;">1519</td>
+        <td style="text-align: right;">5169</td>
+      </tr><tr>
+        <td style="text-align: center;">3</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402020</td>
+        <td>SANDEN</td>
+        <td style="text-align: right;">16122</td>
+        <td style="text-align: right;">10594</td>
+        <td style="text-align: right;">127</td>
+        <td style="text-align: right;">65.71%</td>
+        <td style="text-align: right;">10605</td>
+        <td style="text-align: right;">65.78%</td>
+        
+        <td style="text-align: right;">4984</td>
+        <td style="text-align: right;">202</td>
+        <td style="text-align: right;">419</td>
+        <td style="text-align: right;">621</td>
+
+        <td style="text-align: right;">2975</td>
+        <td style="text-align: right;">2574</td>
+        <td style="text-align: right;">1538</td>
+        <td style="text-align: right;">5549</td>
+      </tr><tr>
+        <td style="text-align: center;">4</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402030</td>
+        <td>KRETEK</td>
+        <td style="text-align: right;">14764</td>
+        <td style="text-align: right;">11939</td>
+        <td style="text-align: right;">226</td>
+        <td style="text-align: right;">80.87%</td>
+        <td style="text-align: right;">11946</td>
+        <td style="text-align: right;">80.91%</td>
+        
+        <td style="text-align: right;">4030</td>
+        <td style="text-align: right;">266</td>
+        <td style="text-align: right;">679</td>
+        <td style="text-align: right;">945</td>
+
+        <td style="text-align: right;">3835</td>
+        <td style="text-align: right;">3026</td>
+        <td style="text-align: right;">1371</td>
+        <td style="text-align: right;">6861</td>
+      </tr><tr>
+        <td style="text-align: center;">5</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402040</td>
+        <td>PUNDONG</td>
+        <td style="text-align: right;">16775</td>
+        <td style="text-align: right;">11836</td>
+        <td style="text-align: right;">296</td>
+        <td style="text-align: right;">70.56%</td>
+        <td style="text-align: right;">11886</td>
+        <td style="text-align: right;">70.86%</td>
+        
+        <td style="text-align: right;">4394</td>
+        <td style="text-align: right;">120</td>
+        <td style="text-align: right;">434</td>
+        <td style="text-align: right;">554</td>
+
+        <td style="text-align: right;">3452</td>
+        <td style="text-align: right;">2694</td>
+        <td style="text-align: right;">1543</td>
+        <td style="text-align: right;">6146</td>
+      </tr><tr>
+        <td style="text-align: center;">6</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402050</td>
+        <td>BAMBANG LIPURO</td>
+        <td style="text-align: right;">20777</td>
+        <td style="text-align: right;">15962</td>
+        <td style="text-align: right;">548</td>
+        <td style="text-align: right;">76.83%</td>
+        <td style="text-align: right;">15985</td>
+        <td style="text-align: right;">76.94%</td>
+        
+        <td style="text-align: right;">6000</td>
+        <td style="text-align: right;">377</td>
+        <td style="text-align: right;">568</td>
+        <td style="text-align: right;">945</td>
+
+        <td style="text-align: right;">3544</td>
+        <td style="text-align: right;">3041</td>
+        <td style="text-align: right;">1141</td>
+        <td style="text-align: right;">6585</td>
+      </tr><tr>
+        <td style="text-align: center;">7</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402060</td>
+        <td>PANDAK</td>
+        <td style="text-align: right;">24263</td>
+        <td style="text-align: right;">16800</td>
+        <td style="text-align: right;">429</td>
+        <td style="text-align: right;">69.24%</td>
+        <td style="text-align: right;">16815</td>
+        <td style="text-align: right;">69.3%</td>
+        
+        <td style="text-align: right;">6173</td>
+        <td style="text-align: right;">236</td>
+        <td style="text-align: right;">569</td>
+        <td style="text-align: right;">805</td>
+
+        <td style="text-align: right;">2646</td>
+        <td style="text-align: right;">3645</td>
+        <td style="text-align: right;">1599</td>
+        <td style="text-align: right;">6291</td>
+      </tr><tr>
+        <td style="text-align: center;">8</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402070</td>
+        <td>BANTUL</td>
+        <td style="text-align: right;">34675</td>
+        <td style="text-align: right;">25904</td>
+        <td style="text-align: right;">543</td>
+        <td style="text-align: right;">74.71%</td>
+        <td style="text-align: right;">25918</td>
+        <td style="text-align: right;">74.75%</td>
+        
+        <td style="text-align: right;">12368</td>
+        <td style="text-align: right;">765</td>
+        <td style="text-align: right;">655</td>
+        <td style="text-align: right;">1420</td>
+
+        <td style="text-align: right;">2089</td>
+        <td style="text-align: right;">4653</td>
+        <td style="text-align: right;">1320</td>
+        <td style="text-align: right;">6742</td>
+      </tr><tr>
+        <td style="text-align: center;">9</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402080</td>
+        <td>JETIS</td>
+        <td style="text-align: right;">29011</td>
+        <td style="text-align: right;">19374</td>
+        <td style="text-align: right;">356</td>
+        <td style="text-align: right;">66.78%</td>
+        <td style="text-align: right;">19402</td>
+        <td style="text-align: right;">66.88%</td>
+        
+        <td style="text-align: right;">8417</td>
+        <td style="text-align: right;">329</td>
+        <td style="text-align: right;">369</td>
+        <td style="text-align: right;">698</td>
+
+        <td style="text-align: right;">2209</td>
+        <td style="text-align: right;">3754</td>
+        <td style="text-align: right;">1401</td>
+        <td style="text-align: right;">5963</td>
+      </tr><tr>
+        <td style="text-align: center;">10</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402090</td>
+        <td>IMOGIRI</td>
+        <td style="text-align: right;">34007</td>
+        <td style="text-align: right;">25121</td>
+        <td style="text-align: right;">554</td>
+        <td style="text-align: right;">73.87%</td>
+        <td style="text-align: right;">25161</td>
+        <td style="text-align: right;">73.99%</td>
+        
+        <td style="text-align: right;">11877</td>
+        <td style="text-align: right;">352</td>
+        <td style="text-align: right;">584</td>
+        <td style="text-align: right;">936</td>
+
+        <td style="text-align: right;">5278</td>
+        <td style="text-align: right;">5655</td>
+        <td style="text-align: right;">3033</td>
+        <td style="text-align: right;">10933</td>
+      </tr><tr>
+        <td style="text-align: center;">11</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402100</td>
+        <td>DLINGO</td>
+        <td style="text-align: right;">19659</td>
+        <td style="text-align: right;">14046</td>
+        <td style="text-align: right;">248</td>
+        <td style="text-align: right;">71.45%</td>
+        <td style="text-align: right;">14059</td>
+        <td style="text-align: right;">71.51%</td>
+        
+        <td style="text-align: right;">5862</td>
+        <td style="text-align: right;">176</td>
+        <td style="text-align: right;">347</td>
+        <td style="text-align: right;">523</td>
+
+        <td style="text-align: right;">6280</td>
+        <td style="text-align: right;">5678</td>
+        <td style="text-align: right;">2988</td>
+        <td style="text-align: right;">11958</td>
+      </tr><tr>
+        <td style="text-align: center;">12</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402110</td>
+        <td>PLERET</td>
+        <td style="text-align: right;">22535</td>
+        <td style="text-align: right;">13980</td>
+        <td style="text-align: right;">231</td>
+        <td style="text-align: right;">62.04%</td>
+        <td style="text-align: right;">13994</td>
+        <td style="text-align: right;">62.1%</td>
+        
+        <td style="text-align: right;">5938</td>
+        <td style="text-align: right;">176</td>
+        <td style="text-align: right;">722</td>
+        <td style="text-align: right;">898</td>
+
+        <td style="text-align: right;">1305</td>
+        <td style="text-align: right;">2802</td>
+        <td style="text-align: right;">650</td>
+        <td style="text-align: right;">4107</td>
+      </tr><tr>
+        <td style="text-align: center;">13</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402120</td>
+        <td>PIYUNGAN</td>
+        <td style="text-align: right;">26188</td>
+        <td style="text-align: right;">18444</td>
+        <td style="text-align: right;">487</td>
+        <td style="text-align: right;">70.43%</td>
+        <td style="text-align: right;">18473</td>
+        <td style="text-align: right;">70.54%</td>
+        
+        <td style="text-align: right;">7760</td>
+        <td style="text-align: right;">301</td>
+        <td style="text-align: right;">616</td>
+        <td style="text-align: right;">917</td>
+
+        <td style="text-align: right;">2397</td>
+        <td style="text-align: right;">2789</td>
+        <td style="text-align: right;">571</td>
+        <td style="text-align: right;">5186</td>
+      </tr><tr>
+        <td style="text-align: center;">14</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402130</td>
+        <td>BANGUNTAPAN</td>
+        <td style="text-align: right;">65723</td>
+        <td style="text-align: right;">38108</td>
+        <td style="text-align: right;">751</td>
+        <td style="text-align: right;">57.98%</td>
+        <td style="text-align: right;">38253</td>
+        <td style="text-align: right;">58.2%</td>
+        
+        <td style="text-align: right;">26132</td>
+        <td style="text-align: right;">1053</td>
+        <td style="text-align: right;">708</td>
+        <td style="text-align: right;">1761</td>
+
+        <td style="text-align: right;">861</td>
+        <td style="text-align: right;">6228</td>
+        <td style="text-align: right;">607</td>
+        <td style="text-align: right;">7089</td>
+      </tr><tr>
+        <td style="text-align: center;">15</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402140</td>
+        <td>SEWON</td>
+        <td style="text-align: right;">61429</td>
+        <td style="text-align: right;">38646</td>
+        <td style="text-align: right;">686</td>
+        <td style="text-align: right;">62.91%</td>
+        <td style="text-align: right;">38740</td>
+        <td style="text-align: right;">63.06%</td>
+        
+        <td style="text-align: right;">25952</td>
+        <td style="text-align: right;">777</td>
+        <td style="text-align: right;">654</td>
+        <td style="text-align: right;">1431</td>
+
+        <td style="text-align: right;">1602</td>
+        <td style="text-align: right;">6375</td>
+        <td style="text-align: right;">823</td>
+        <td style="text-align: right;">7977</td>
+      </tr><tr>
+        <td style="text-align: center;">16</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402150</td>
+        <td>KASIHAN</td>
+        <td style="text-align: right;">62111</td>
+        <td style="text-align: right;">38963</td>
+        <td style="text-align: right;">779</td>
+        <td style="text-align: right;">62.73%</td>
+        <td style="text-align: right;">39017</td>
+        <td style="text-align: right;">62.82%</td>
+        
+        <td style="text-align: right;">23897</td>
+        <td style="text-align: right;">1316</td>
+        <td style="text-align: right;">898</td>
+        <td style="text-align: right;">2214</td>
+
+        <td style="text-align: right;">890</td>
+        <td style="text-align: right;">5759</td>
+        <td style="text-align: right;">1145</td>
+        <td style="text-align: right;">6649</td>
+      </tr><tr>
+        <td style="text-align: center;">17</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402160</td>
+        <td>PAJANGAN</td>
+        <td style="text-align: right;">17728</td>
+        <td style="text-align: right;">11863</td>
+        <td style="text-align: right;">275</td>
+        <td style="text-align: right;">66.92%</td>
+        <td style="text-align: right;">11906</td>
+        <td style="text-align: right;">67.16%</td>
+        
+        <td style="text-align: right;">4639</td>
+        <td style="text-align: right;">270</td>
+        <td style="text-align: right;">247</td>
+        <td style="text-align: right;">517</td>
+
+        <td style="text-align: right;">2608</td>
+        <td style="text-align: right;">2714</td>
+        <td style="text-align: right;">1333</td>
+        <td style="text-align: right;">5322</td>
+      </tr><tr>
+        <td style="text-align: center;">18</td>
+        <td style="mso-number-format:'\@'; text-align: center;">3402170</td>
+        <td>SEDAYU</td>
+        <td style="text-align: right;">25029</td>
+        <td style="text-align: right;">17754</td>
+        <td style="text-align: right;">301</td>
+        <td style="text-align: right;">70.93%</td>
+        <td style="text-align: right;">17779</td>
+        <td style="text-align: right;">71.03%</td>
+        
+        <td style="text-align: right;">7611</td>
+        <td style="text-align: right;">379</td>
+        <td style="text-align: right;">377</td>
+        <td style="text-align: right;">756</td>
+
+        <td style="text-align: right;">3038</td>
+        <td style="text-align: right;">3562</td>
+        <td style="text-align: right;">1924</td>
+        <td style="text-align: right;">6600</td>
+      </tr></tbody></table></body></html>

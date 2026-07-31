@@ -1,0 +1,651 @@
+﻿<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Rekap Petugas</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+    <body>
+    <h2>Rekapitulasi Progres per Petugas (PCL)</h2>
+    <table border="1">
+      <thead>
+        <tr style="background-color: #0d9488; color: #ffffff; font-weight: bold; text-align: center;">
+          <th rowspan="2">No</th>
+          <th rowspan="2">Nama Petugas</th>
+          <th rowspan="2">Email</th>
+          <th rowspan="2">Role</th>
+          <th rowspan="2">Sub-SLS Diampu</th>
+          <th colspan="7" style="background-color: #115e59;">PROGRES PENDATAAN</th>
+          <th colspan="3" style="background-color: #1e3a8a;">USAHA PERUSAHAAN BKU</th>
+          <th colspan="3" style="background-color: #064e3b;">USAHA KELUARGA</th>
+        </tr>
+        <tr style="background-color: #0f766e; color: #ffffff; font-weight: bold; text-align: center;">
+          <th>Target Prelist</th>
+          <th>Responden Didata</th>
+          <th>+ Didata</th>
+          <th>% Didata</th>
+          <th>Responden Draft</th>
+          <th>+ Draft</th>
+          <th>% Didata+Draft</th>
+          
+          <th>BKU Ditemukan</th>
+          <th>BKU Baru</th>
+          <th>Total BKU</th>
+
+          <th>Keluarga Ditemukan</th>
+          <th>Keluarga Baru</th>
+          <th>Total Usaha Keluarga</th>
+        </tr>
+      </thead>
+      <tbody><tr>
+        <td style="text-align: center;">1</td>
+        <td>Alin Nurul Kusanah</td>
+        <td>alinnurul963@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">11</td>
+        
+        <td style="text-align: right;">568</td>
+        <td style="text-align: right;">604</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">106.34%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">106.34%</td>
+        
+        <td style="text-align: right;">8</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">8</td>
+
+        <td style="text-align: right;">218</td>
+        <td style="text-align: right;">187</td>
+        <td style="text-align: right;">405</td>
+      </tr><tr>
+        <td style="text-align: center;">2</td>
+        <td>Ani edipriyati</td>
+        <td>edipriyatiani@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">8</td>
+        
+        <td style="text-align: right;">564</td>
+        <td style="text-align: right;">419</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">74.29%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">74.29%</td>
+        
+        <td style="text-align: right;">28</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">28</td>
+
+        <td style="text-align: right;">109</td>
+        <td style="text-align: right;">100</td>
+        <td style="text-align: right;">209</td>
+      </tr><tr>
+        <td style="text-align: center;">3</td>
+        <td>Aria Tri Wicaksono</td>
+        <td>aryajosss11@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">9</td>
+        
+        <td style="text-align: right;">475</td>
+        <td style="text-align: right;">242</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">50.95%</td>
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">51.16%</td>
+        
+        <td style="text-align: right;">36</td>
+        <td style="text-align: right;">15</td>
+        <td style="text-align: right;">51</td>
+
+        <td style="text-align: right;">71</td>
+        <td style="text-align: right;">70</td>
+        <td style="text-align: right;">141</td>
+      </tr><tr>
+        <td style="text-align: center;">4</td>
+        <td>Cipta gumilang putra</td>
+        <td>ciptabaparezky@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">4</td>
+        
+        <td style="text-align: right;">332</td>
+        <td style="text-align: right;">292</td>
+        <td style="text-align: right;">3</td>
+        <td style="text-align: right;">87.95%</td>
+        <td style="text-align: right;">4</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">89.16%</td>
+        
+        <td style="text-align: right;">9</td>
+        <td style="text-align: right;">39</td>
+        <td style="text-align: right;">48</td>
+
+        <td style="text-align: right;">15</td>
+        <td style="text-align: right;">96</td>
+        <td style="text-align: right;">111</td>
+      </tr><tr>
+        <td style="text-align: center;">5</td>
+        <td>Deny permana putra</td>
+        <td>denypermana892@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">9</td>
+        
+        <td style="text-align: right;">621</td>
+        <td style="text-align: right;">543</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">87.44%</td>
+        <td style="text-align: right;">9</td>
+        <td style="text-align: right;">7</td>
+        <td style="text-align: right;">88.89%</td>
+        
+        <td style="text-align: right;">4</td>
+        <td style="text-align: right;">12</td>
+        <td style="text-align: right;">16</td>
+
+        <td style="text-align: right;">250</td>
+        <td style="text-align: right;">164</td>
+        <td style="text-align: right;">414</td>
+      </tr><tr>
+        <td style="text-align: center;">6</td>
+        <td>Derry Eko Herdiawan</td>
+        <td>derryeko115@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">8</td>
+        
+        <td style="text-align: right;">520</td>
+        <td style="text-align: right;">375</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">72.12%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">72.12%</td>
+        
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">5</td>
+        <td style="text-align: right;">5</td>
+
+        <td style="text-align: right;">99</td>
+        <td style="text-align: right;">80</td>
+        <td style="text-align: right;">179</td>
+      </tr><tr>
+        <td style="text-align: center;">7</td>
+        <td>Eli Husin Alkhafi</td>
+        <td>elihusen08@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">9</td>
+        
+        <td style="text-align: right;">515</td>
+        <td style="text-align: right;">307</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">59.61%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">59.61%</td>
+        
+        <td style="text-align: right;">4</td>
+        <td style="text-align: right;">7</td>
+        <td style="text-align: right;">11</td>
+
+        <td style="text-align: right;">129</td>
+        <td style="text-align: right;">54</td>
+        <td style="text-align: right;">183</td>
+      </tr><tr>
+        <td style="text-align: center;">8</td>
+        <td>Elisa Fitrianingrum</td>
+        <td>elisa.fitrianingrum@mail.ugm.ac.id</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">11</td>
+        
+        <td style="text-align: right;">547</td>
+        <td style="text-align: right;">401</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">73.31%</td>
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">73.67%</td>
+        
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">3</td>
+
+        <td style="text-align: right;">94</td>
+        <td style="text-align: right;">89</td>
+        <td style="text-align: right;">183</td>
+      </tr><tr>
+        <td style="text-align: center;">9</td>
+        <td>EMI LISTIANA</td>
+        <td>emmiemoytiana@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">4</td>
+        
+        <td style="text-align: right;">99</td>
+        <td style="text-align: right;">376</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">379.8%</td>
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">381.82%</td>
+        
+        <td style="text-align: right;">4</td>
+        <td style="text-align: right;">357</td>
+        <td style="text-align: right;">361</td>
+
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+      </tr><tr>
+        <td style="text-align: center;">10</td>
+        <td>ERNI DWI OKTANTRI</td>
+        <td>ernioktantri@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">12</td>
+        
+        <td style="text-align: right;">712</td>
+        <td style="text-align: right;">494</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">69.38%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">69.38%</td>
+        
+        <td style="text-align: right;">17</td>
+        <td style="text-align: right;">6</td>
+        <td style="text-align: right;">23</td>
+
+        <td style="text-align: right;">147</td>
+        <td style="text-align: right;">75</td>
+        <td style="text-align: right;">222</td>
+      </tr><tr>
+        <td style="text-align: center;">11</td>
+        <td>Esthi Rahayu budiyanti</td>
+        <td>estirahayu2143@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">14</td>
+        
+        <td style="text-align: right;">624</td>
+        <td style="text-align: right;">379</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">60.74%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">60.74%</td>
+        
+        <td style="text-align: right;">6</td>
+        <td style="text-align: right;">6</td>
+        <td style="text-align: right;">12</td>
+
+        <td style="text-align: right;">168</td>
+        <td style="text-align: right;">82</td>
+        <td style="text-align: right;">250</td>
+      </tr><tr>
+        <td style="text-align: center;">12</td>
+        <td>Evita Dwi Nuryani</td>
+        <td>evitadwi09@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">8</td>
+        
+        <td style="text-align: right;">523</td>
+        <td style="text-align: right;">370</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">70.75%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">70.75%</td>
+        
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">7</td>
+        <td style="text-align: right;">8</td>
+
+        <td style="text-align: right;">146</td>
+        <td style="text-align: right;">139</td>
+        <td style="text-align: right;">285</td>
+      </tr><tr>
+        <td style="text-align: center;">13</td>
+        <td>Fitri Astuti</td>
+        <td>astutif748@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">11</td>
+        
+        <td style="text-align: right;">607</td>
+        <td style="text-align: right;">438</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">72.16%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">72.16%</td>
+        
+        <td style="text-align: right;">10</td>
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">12</td>
+
+        <td style="text-align: right;">167</td>
+        <td style="text-align: right;">103</td>
+        <td style="text-align: right;">270</td>
+      </tr><tr>
+        <td style="text-align: center;">14</td>
+        <td>Fitri Indarsih</td>
+        <td>fitriindarsih001@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">4</td>
+        
+        <td style="text-align: right;">368</td>
+        <td style="text-align: right;">296</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">80.43%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">80.43%</td>
+        
+        <td style="text-align: right;">20</td>
+        <td style="text-align: right;">40</td>
+        <td style="text-align: right;">60</td>
+
+        <td style="text-align: right;">18</td>
+        <td style="text-align: right;">143</td>
+        <td style="text-align: right;">161</td>
+      </tr><tr>
+        <td style="text-align: center;">15</td>
+        <td>Ira puspitasari</td>
+        <td>irapuspitasari93@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">13</td>
+        
+        <td style="text-align: right;">643</td>
+        <td style="text-align: right;">505</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">78.54%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">78.54%</td>
+        
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">1</td>
+
+        <td style="text-align: right;">128</td>
+        <td style="text-align: right;">77</td>
+        <td style="text-align: right;">205</td>
+      </tr><tr>
+        <td style="text-align: center;">16</td>
+        <td>Khoirina Nuryani</td>
+        <td>nkhoirina@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">9</td>
+        
+        <td style="text-align: right;">530</td>
+        <td style="text-align: right;">418</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">78.87%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">78.87%</td>
+        
+        <td style="text-align: right;">7</td>
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">8</td>
+
+        <td style="text-align: right;">103</td>
+        <td style="text-align: right;">137</td>
+        <td style="text-align: right;">240</td>
+      </tr><tr>
+        <td style="text-align: center;">17</td>
+        <td>Nanda Mardhiana</td>
+        <td>nandamardhiana366@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">9</td>
+        
+        <td style="text-align: right;">508</td>
+        <td style="text-align: right;">371</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">73.03%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">73.03%</td>
+        
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">3</td>
+        <td style="text-align: right;">4</td>
+
+        <td style="text-align: right;">134</td>
+        <td style="text-align: right;">152</td>
+        <td style="text-align: right;">286</td>
+      </tr><tr>
+        <td style="text-align: center;">18</td>
+        <td>OSELIN RAYA RAHMADANI</td>
+        <td>osellinrahmadani@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">7</td>
+        
+        <td style="text-align: right;">438</td>
+        <td style="text-align: right;">207</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">47.26%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">47.26%</td>
+        
+        <td style="text-align: right;">4</td>
+        <td style="text-align: right;">12</td>
+        <td style="text-align: right;">16</td>
+
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">52</td>
+        <td style="text-align: right;">54</td>
+      </tr><tr>
+        <td style="text-align: center;">19</td>
+        <td>Rina Padwanti</td>
+        <td>rinapadd@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">13</td>
+        
+        <td style="text-align: right;">625</td>
+        <td style="text-align: right;">395</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">63.2%</td>
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">63.52%</td>
+        
+        <td style="text-align: right;">6</td>
+        <td style="text-align: right;">3</td>
+        <td style="text-align: right;">9</td>
+
+        <td style="text-align: right;">128</td>
+        <td style="text-align: right;">117</td>
+        <td style="text-align: right;">245</td>
+      </tr><tr>
+        <td style="text-align: center;">20</td>
+        <td>RIYANTI</td>
+        <td>riyantiriyanti0406@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">13</td>
+        
+        <td style="text-align: right;">622</td>
+        <td style="text-align: right;">431</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">69.29%</td>
+        <td style="text-align: right;">8</td>
+        <td style="text-align: right;">8</td>
+        <td style="text-align: right;">70.58%</td>
+        
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">2</td>
+
+        <td style="text-align: right;">309</td>
+        <td style="text-align: right;">107</td>
+        <td style="text-align: right;">416</td>
+      </tr><tr>
+        <td style="text-align: center;">21</td>
+        <td>Rizka Harumawasti</td>
+        <td>rizkaharumawasti@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">5</td>
+        
+        <td style="text-align: right;">296</td>
+        <td style="text-align: right;">398</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">134.46%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">134.46%</td>
+        
+        <td style="text-align: right;">12</td>
+        <td style="text-align: right;">86</td>
+        <td style="text-align: right;">98</td>
+
+        <td style="text-align: right;">127</td>
+        <td style="text-align: right;">57</td>
+        <td style="text-align: right;">184</td>
+      </tr><tr>
+        <td style="text-align: center;">22</td>
+        <td>Sholiqin</td>
+        <td>sholiqinbaru@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">12</td>
+        
+        <td style="text-align: right;">621</td>
+        <td style="text-align: right;">399</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">64.25%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">64.25%</td>
+        
+        <td style="text-align: right;">7</td>
+        <td style="text-align: right;">5</td>
+        <td style="text-align: right;">12</td>
+
+        <td style="text-align: right;">95</td>
+        <td style="text-align: right;">76</td>
+        <td style="text-align: right;">171</td>
+      </tr><tr>
+        <td style="text-align: center;">23</td>
+        <td>SRI KURNIASTUTI</td>
+        <td>ganisdewi71779@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">15</td>
+        
+        <td style="text-align: right;">675</td>
+        <td style="text-align: right;">605</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">89.63%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">89.63%</td>
+        
+        <td style="text-align: right;">11</td>
+        <td style="text-align: right;">4</td>
+        <td style="text-align: right;">15</td>
+
+        <td style="text-align: right;">321</td>
+        <td style="text-align: right;">133</td>
+        <td style="text-align: right;">454</td>
+      </tr><tr>
+        <td style="text-align: center;">24</td>
+        <td>Sulastri</td>
+        <td>sulastri02018@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">14</td>
+        
+        <td style="text-align: right;">685</td>
+        <td style="text-align: right;">463</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">67.59%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">67.59%</td>
+        
+        <td style="text-align: right;">2</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">2</td>
+
+        <td style="text-align: right;">136</td>
+        <td style="text-align: right;">91</td>
+        <td style="text-align: right;">227</td>
+      </tr><tr>
+        <td style="text-align: center;">25</td>
+        <td>Susi dwi lestari</td>
+        <td>dsusi2706@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">11</td>
+        
+        <td style="text-align: right;">520</td>
+        <td style="text-align: right;">473</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">90.96%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">90.96%</td>
+        
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">4</td>
+        <td style="text-align: right;">5</td>
+
+        <td style="text-align: right;">224</td>
+        <td style="text-align: right;">113</td>
+        <td style="text-align: right;">337</td>
+      </tr><tr>
+        <td style="text-align: center;">26</td>
+        <td>Tri Sulandari</td>
+        <td>ndari123456nd@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">9</td>
+        
+        <td style="text-align: right;">583</td>
+        <td style="text-align: right;">362</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">62.09%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">62.09%</td>
+        
+        <td style="text-align: right;">6</td>
+        <td style="text-align: right;">13</td>
+        <td style="text-align: right;">19</td>
+
+        <td style="text-align: right;">34</td>
+        <td style="text-align: right;">63</td>
+        <td style="text-align: right;">97</td>
+      </tr><tr>
+        <td style="text-align: center;">27</td>
+        <td>Widya Ningsih</td>
+        <td>wiwidharjos@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">10</td>
+        
+        <td style="text-align: right;">541</td>
+        <td style="text-align: right;">388</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">71.72%</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">71.72%</td>
+        
+        <td style="text-align: right;">20</td>
+        <td style="text-align: right;">6</td>
+        <td style="text-align: right;">26</td>
+
+        <td style="text-align: right;">74</td>
+        <td style="text-align: right;">182</td>
+        <td style="text-align: right;">256</td>
+      </tr><tr>
+        <td style="text-align: center;">28</td>
+        <td>Yuniyanto</td>
+        <td>amcanto91@gmail.com</td>
+        <td style="text-align: center;">PPL</td>
+        <td style="text-align: right;">6</td>
+        
+        <td style="text-align: right;">402</td>
+        <td style="text-align: right;">267</td>
+        <td style="text-align: right;">-3</td>
+        <td style="text-align: right;">66.42%</td>
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">0</td>
+        <td style="text-align: right;">66.67%</td>
+        
+        <td style="text-align: right;">6</td>
+        <td style="text-align: right;">6</td>
+        <td style="text-align: right;">12</td>
+
+        <td style="text-align: right;">78</td>
+        <td style="text-align: right;">70</td>
+        <td style="text-align: right;">148</td>
+      </tr></tbody></table></body></html>
