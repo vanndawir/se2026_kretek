@@ -6,19 +6,18 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Konfigurasi View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Fungsi pembaca file Excel/HTML rekap yang aman & akurat
+// Fungsi membaca file dari folder data/2026-07-31/
 function readRekapFile(filename) {
     try {
-        const filePath = path.join(__dirname, filename);
+        const filePath = path.join(__dirname, 'data', '2026-07-31', filename);
         if (!fs.existsSync(filePath)) {
-            console.warn(`File tidak ditemukan: ${filename}`);
+            console.warn(`File tidak ditemukan: ${filePath}`);
             return { headers: [], rows: [], objects: [] };
         }
         
@@ -31,7 +30,6 @@ function readRekapFile(filename) {
         const headers = rawData[1] || rawData[0] || [];
         const rawRows = rawData.slice(2).filter(r => r && r.length > 0);
 
-        // Ubah baris array menjadi objek agar mudah diakses di EJS maupun API
         const objects = rawRows.map(row => ({
             no: row[0],
             nama: row[1] || row[2] || '-',
@@ -52,18 +50,15 @@ function readRekapFile(filename) {
 }
 
 app.get('/', (req, res) => {
-    // Baca data dari file tanggal 31 Juli 2026
     const kecStore = readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls');
     const desaStore = readRekapFile('rekap_wilayah_desa_2026-07-31.xls');
     const pmlStore = readRekapFile('rekap_petugas_pml_2026-07-31.xls');
     const pclStore = readRekapFile('rekap_petugas_pcl_2026-07-31.xls');
 
-    // Urutkan PCL berdasarkan progress harian (+ Didata)
     const sortedPcl = [...pclStore.objects].sort((a, b) => b.harian - a.harian);
     const topPcl = sortedPcl.slice(0, 5);
     const bottomPcl = [...sortedPcl].sort((a, b) => a.harian - b.harian).slice(0, 5);
 
-    // Kirim data lengkap ke file index.ejs
     res.render('index', {
         activeDate: '31 Juli 2026',
         topPcl: topPcl,
