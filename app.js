@@ -30,11 +30,22 @@ function readRekapFile(filename) {
         const worksheet = workbook.Sheets[sheetName];
         const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
-        const headers = rawData[1] || rawData[0] || [];
-        const rows = rawData.slice(2).filter(r => r && r.length > 0);
+        const headers = rawData[0] || [];
+        
+        // Ambil semua baris yang memiliki data dan abaikan baris judul/header teks
+        const rows = rawData.filter(r => {
+            if (!r || r.length === 0) return false;
+            const text = r.join(' ').toLowerCase();
+            // Lewati baris header/judul
+            if (text.includes('rekap') || text.includes('nama petugas') || text.includes('kecamatan') && text.includes('target')) {
+                return false;
+            }
+            return true;
+        });
 
-        const objects = rows.map(row => {
-            let label = '-';
+        const objects = rows.map((row, index) => {
+            // Cari teks yang valid sebagai nama atau wilayah
+            let label = `Item ${index + 1}`;
             for (let i = 0; i < row.length; i++) {
                 const val = row[i];
                 if (typeof val === 'string' && val.trim().length > 1 && !val.includes('@') && !val.includes('%') && isNaN(val)) {
@@ -42,11 +53,11 @@ function readRekapFile(filename) {
                     break;
                 }
             }
-            if (label === '-' && row[1]) label = String(row[1]).trim();
-            if (label === '-' && row[0]) label = String(row[0]).trim();
+            if (label.startsWith('Item') && row[1]) label = String(row[1]).trim();
+            if (label.startsWith('Item') && row[0]) label = String(row[0]).trim();
 
             return {
-                no: row[0] || '',
+                no: row[0] || (index + 1),
                 nama: label,
                 name: label,
                 Nama: label,
@@ -71,26 +82,11 @@ function readRekapFile(filename) {
     }
 }
 
-// API Endpoints untuk mengantisipasi fetch dari frontend JavaScript
-app.get('/api/kecamatan', (req, res) => {
-    const store = readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls');
-    res.json(store.objects);
-});
-
-app.get('/api/desa', (req, res) => {
-    const store = readRekapFile('rekap_wilayah_desa_2026-07-31.xls');
-    res.json(store.objects);
-});
-
-app.get('/api/pml', (req, res) => {
-    const store = readRekapFile('rekap_petugas_pml_2026-07-31.xls');
-    res.json(store.objects);
-});
-
-app.get('/api/pcl', (req, res) => {
-    const store = readRekapFile('rekap_petugas_pcl_2026-07-31.xls');
-    res.json(store.objects);
-});
+// API Endpoints untuk dropdown / AJAX fetch
+app.get('/api/kecamatan', (req, res) => res.json(readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls').objects));
+app.get('/api/desa', (req, res) => res.json(readRekapFile('rekap_wilayah_desa_2026-07-31.xls').objects));
+app.get('/api/pml', (req, res) => res.json(readRekapFile('rekap_petugas_pml_2026-07-31.xls').objects));
+app.get('/api/pcl', (req, res) => res.json(readRekapFile('rekap_petugas_pcl_2026-07-31.xls').objects));
 
 app.get('/', (req, res) => {
     try {
