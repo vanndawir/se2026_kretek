@@ -34,23 +34,26 @@ function readRekapFile(filename) {
         const rows = rawData.slice(2).filter(r => r && r.length > 0);
 
         const objects = rows.map(row => {
-            // Deteksi otomatis teks yang valid sebagai nama orang
-            let foundName = '-';
+            let label = '-';
             for (let i = 0; i < row.length; i++) {
                 const val = row[i];
-                if (typeof val === 'string' && val.trim().length > 2 && !val.includes('@') && !val.includes('%') && isNaN(val)) {
-                    foundName = val.trim();
+                if (typeof val === 'string' && val.trim().length > 1 && !val.includes('@') && !val.includes('%') && isNaN(val)) {
+                    label = val.trim();
                     break;
                 }
             }
-            if (foundName === '-' && row[1]) foundName = String(row[1]).trim();
+            if (label === '-' && row[1]) label = String(row[1]).trim();
+            if (label === '-' && row[0]) label = String(row[0]).trim();
 
             return {
                 no: row[0] || '',
-                nama: foundName,
-                name: foundName,
-                Nama: foundName,
-                namaPetugas: foundName,
+                nama: label,
+                name: label,
+                Nama: label,
+                namaPetugas: label,
+                wilayah: label,
+                kecamatan: label,
+                desa: label,
                 email: row[2] || '-',
                 role: row[3] || 'PPL',
                 subSlv: row[4] || 0,
@@ -83,14 +86,19 @@ app.get('/', (req, res) => {
             activeDate: '31 Juli 2026',
             topPcl: topPcl,
             bottomPcl: bottomPcl,
-            kecHeaders: kecStore.headers,
+            // Kirim kedua varian nama variabel agar cocok dengan EJS apa pun
+            kecamatan: kecStore.objects,
             kecData: kecStore.objects,
-            desaHeaders: desaStore.headers,
+            kecHeaders: kecStore.headers,
+            desa: desaStore.objects,
             desaData: desaStore.objects,
-            pmlHeaders: pmlStore.headers,
+            desaHeaders: desaStore.headers,
+            pml: pmlStore.objects,
             pmlData: pmlStore.objects,
-            pclHeaders: pclStore.headers,
+            pmlHeaders: pmlStore.headers,
+            pcl: pclStore.objects,
             pclData: pclStore.objects,
+            pclHeaders: pclStore.headers,
             desaHarianMap: {},
             pmlHarianMap: {},
             pclHarianMap: {}
