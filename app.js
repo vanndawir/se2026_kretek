@@ -1,5 +1,6 @@
 const express = require('express');
 const XLSX = require('xlsx');
+const fs = require('fs');
 const path = require('path');
 
 const app = express();
@@ -13,15 +14,23 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Fungsi pembantu untuk membaca file excel / html rekap
+// Fungsi pembaca file Excel/HTML rekap yang aman
 function readExcelSafely(filename) {
     try {
         const filePath = path.join(__dirname, filename);
-        const workbook = XLSX.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+        if (!fs.existsSync(filePath)) {
+            console.error("File tidak ditemukan di path:", filePath);
+            return { headers: [], rows: [] };
+        }
         
-        // Baris 0 & 1 biasanya header, data mulai baris ke-2
+        // Baca file sebagai buffer (karena file .xls ini berformat HTML)
+        const fileBuffer = fs.readFileSync(filePath);
+        const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        // Baris 0 & 1 adalah header tabel, data riil mulai baris ke-2
         const headers = rawData[1] || rawData[0] || [];
         const rows = rawData.slice(2).filter(r => r && r.length > 0);
         return { headers, rows };
@@ -31,16 +40,16 @@ function readExcelSafely(filename) {
     }
 }
 
-// ROUTE UTAMA (Menampilkan Halaman Web & Mencegah Cannot GET /)
+// ROUTE UTAMA
 app.get('/', (req, res) => {
-    // Ambil data PCL/PPL dari file terbaru
     const pclStore = readExcelSafely('rekap_petugas_pcl_2026-07-31.xls');
 
-    // Proses data PCL untuk Top & Bottom Progress Harian jika diperlukan
+    // Proses Top & Bottom PCL untuk progress harian
     let processedPcl = pclStore.rows.map(row => {
         return {
             name: row[1] || '-',
-            harian: parseFloat(row[7]) || 0 // Kolom harian
+            harian: parseFloat(row[7]) || 0,
+            persen: row[8] || '0%'
         };
     }).sort((a, b) => b.harian - a.harian);
 
