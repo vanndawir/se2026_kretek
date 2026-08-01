@@ -31,11 +31,11 @@
             transition: opacity 0.8s ease, visibility 0.8s ease;
         }
         .splash-logo {
-            width: 28vw;               /* Ukuran proposional merespons lebar layar */
-            max-width: 280px;          /* Batas maksimal agar tidak terlalu besar di PC */
-            min-width: 170px;          /* Batas minimal agar tetap jelas di HP kecil */
+            width: 28vw;            /* Ukuran proposional merespons lebar layar */
+            max-width: 280px;      /* Batas maksimal agar tidak terlalu besar di PC */
+            min-width: 170px;      /* Batas minimal agar tetap jelas di HP kecil */
             height: auto;
-            aspect-ratio: 1 / 1;       /* Menjaga bentuk tetap lingkaran sempurna */
+            aspect-ratio: 1 / 1;   /* Menjaga bentuk tetap lingkaran sempurna */
             object-fit: contain;
             border-radius: 50%;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
@@ -78,6 +78,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         .logo-container img {
             height: 48px;
@@ -89,24 +90,52 @@
         .header-title-area {
             text-align: center;
             flex-grow: 1;
-            margin: 0 20px;
+            margin: 0 15px;
+            overflow: hidden;
         }
         h1 {
             color: #ffffff;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            margin: 0 0 5px 0;
-            font-size: 24px;
-            letter-spacing: 1px;
+            margin: 0 0 2px 0;
+            font-size: 20px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
+        }
+        .title-se {
+            color: var(--primary-orange);
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 2px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .subtitle {
             color: #e4e4e7;
             font-size: 13px;
-            margin: 0;
+            margin: 0 0 5px 0;
+            font-weight: 500;
         }
-        .subtitle span {
+
+        /* Running Text Styling */
+        .running-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            padding: 3px 0;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+        }
+        .running-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 16s linear infinite;
             color: #fed7aa;
+            font-size: 12px;
             font-weight: bold;
+        }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
         }
 
         .ranking-grid {
@@ -216,13 +245,16 @@
         }
 
         @media(max-width: 768px) {
-            .app-header { flex-direction: column; gap: 15px; text-align: center; }
-            .header-title-area { margin: 0; }
+            .app-header { padding: 12px 15px; }
+            .logo-container img { height: 38px; }
+            h1 { font-size: 15px; }
+            .title-se { font-size: 14px; }
+            .subtitle { font-size: 11px; }
         }
     </style>
 </head>
 <body>
-    <!-- SPLASH SCREEN / GAMBAR PEMBUKA (Tanpa Teks, Logo Proposional) -->
+    <!-- SPLASH SCREEN / GAMBAR PEMBUKA -->
     <div id="splash-screen">
         <img src="/images/logo_kretek.png" alt="Logo Kapanewon Kretek" class="splash-logo">
     </div>
@@ -234,8 +266,12 @@
                 <img src="/images/logo_bps.png" alt="Logo BPS">
             </div>
             <div class="header-title-area">
-                <h1>Monitoring Lapangan SE2026</h1>
-                <div class="subtitle">Kapanewon Kretek &mdash; Data Tanggal: <span><%= activeDate %></span></div>
+                <h1>Monitoring Lapangan</h1>
+                <div class="title-se">SE2026</div>
+                <div class="subtitle">Kapanewon Kretek</div>
+                <div class="running-container">
+                    <div class="running-text">Data Tanggal: <span><%= activeDate %></span></div>
+                </div>
             </div>
             <div class="logo-container" title="Logo Sensus Ekonomi 2026">
                 <img src="/images/logo_se.png" alt="Logo Sensus Ekonomi">
@@ -455,8 +491,9 @@
 
             box.innerHTML = html;
         }
-    </script><div style="text-align: center; padding: 30px 0 20px 0; color: #888; font-size: 13px;">
-    Desain &amp; Website by <b>vanndawir</b>
-</div>
+    </script>
+    <div style="text-align: center; padding: 30px 0 20px 0; color: #888; font-size: 13px;">
+        Desain &amp; Website by <b>vanndawir</b>
+    </div>
 </body>
 </html>
