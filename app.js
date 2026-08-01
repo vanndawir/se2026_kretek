@@ -4,66 +4,75 @@ const path = require('path');
 const cheerio = require('cheerio');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
-// Fungsi helper untuk mencari file terbaru berdasarkan pola (prefix) dan tanggal di nama file (YYYY-MM-DD)
+// Fungsi helper untuk mencari file terbaru berdasarkan prefix dan tanggal (YYYY-MM-DD)
 function getLatestFile(prefix) {
-    const files = fs.readdirSync(__dirname);
-    // Filter file yang diawali prefix dan berakhiran .xls
-    const matchedFiles = files.filter(f => f.startsWith(prefix) && f.endsWith('.xls'));
-    
-    if (matchedFiles.length === 0) return null;
+    try {
+        const files = fs.readdirSync(__dirname);
+        // Filter file yang diawali prefix tertentu dan berakhiran .xls
+        const matchedFiles = files.filter(f => f.startsWith(prefix) && f.endsWith('.xls'));
+        
+        if (matchedFiles.length === 0) return null;
 
-    // Urutkan berdasarkan nama file secara descending (karena format YYYY-MM-DD terurut secara leksikografis)
-    matchedFiles.sort().reverse();
-    return matchedFiles[0];
+        // Urutkan secara descending karena format tanggal YYYY-MM-DD otomatis terurut leksikografis
+        matchedFiles.sort().reverse();
+        return matchedFiles[0];
+    } catch (error) {
+        console.error(`Gagal membaca direktori untuk prefix ${prefix}:`, error);
+        return null;
+    }
 }
 
 // Fungsi helper untuk memparsing file .xls yang berformat HTML tabel
-function parseHtmlXls(filePath) {
-    if (!filePath || !fs.existsSync(filePath)) return { headers: [], rows: [] };
+function parseHtmlXls(filename) {
+    if (!filename) return { headers: [], rows: [] };
+
+    const filePath = path.join(__dirname, filename);
+    if (!fs.existsSync(filePath)) return { headers: [], rows: [] };
 
     const htmlContent = fs.readFileSync(filePath, 'utf-8');
     const $ = cheerio.load(htmlContent);
     
-    const rows = [];
     const headers = [];
+    const rows = [];
 
-    // Ambil baris header (biasanya di dalam <thead> tr)
+    // Mengambil baris dari tabel HTML
     $('table tr').each((i, el) => {
         const rowData = [];
         $(el).find('th, td').each((j, cell) => {
             rowData.push($(cell).text().trim());
         });
         
+        // Memisahkan baris header dan baris data
         if (i < 2) {
-            headers.push(rowData); // Jika ada multi-row header
+            headers.push(rowData); // Mengakomodasi multi-row header jika ada
         } else {
             rows.push(rowData);
         }
     });
 
-    return { headers, rows };
+    return { headers, rows, filename };
 }
 
+// Route Utama
 app.get('/', (req, res) => {
-    // Auto-detect file rekap terbaru
+    // Auto-detect file rekap terbaru berdasarkan tanggal
     const latestPcl = getLatestFile('rekap_petugas_pcl_');
     const latestPml = getLatestFile('rekap_petugas_pml_');
-    const latestDesa = getLiveFile = getLatestFile('rekap_wilayah_desa_');
+    const latestDesa = getLatestFile('rekap_wilayah_desa_');
     const latestKec = getLatestFile('rekap_wilayah_kecamatan_');
 
+    // Parse data dari masing-masing file terbaru
     const pclData = parseHtmlXls(latestPcl);
     const pmlData = parseHtmlXls(latestPml);
     const desaData = parseHtmlXls(latestDesa);
     const kecData = parseHtmlXls(latestKec);
 
     res.render('index', {
-        latestPcl,
-        latestPml,
-        latestDesa,
-        latestKec,
         pclData,
         pmlData,
         desaData,
@@ -71,6 +80,6 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log('Server berjalan di http://localhost:3000');
+app.listen(PORT, () => {
+    console.log(`Server berjalan di http://localhost:${PORT}`);
 });
