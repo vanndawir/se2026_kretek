@@ -21,7 +21,7 @@ function readRekapFile(filename) {
 
         if (!fs.existsSync(filePath)) {
             console.warn(`File tidak ditemukan: ${filename}`);
-            return [];
+            return { headers: [], rows: [], objects: [] };
         }
         
         const fileBuffer = fs.readFileSync(filePath);
@@ -30,9 +30,10 @@ function readRekapFile(filename) {
         const worksheet = workbook.Sheets[sheetName];
         const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
+        const headers = rawData[1] || rawData[0] || [];
         const rows = rawData.slice(2).filter(r => r && r.length > 0);
 
-        return rows.map(row => ({
+        const objects = rows.map(row => ({
             no: row[0] || '',
             nama: row[1] || '-',
             email: row[2] || '-',
@@ -43,31 +44,37 @@ function readRekapFile(filename) {
             harian: parseFloat(row[7]) || 0,
             persen: row[8] || '0%'
         }));
+
+        return { headers, rows, objects };
     } catch (e) {
         console.error(`Gagal membaca ${filename}:`, e.message);
-        return [];
+        return { headers: [], rows: [], objects: [] };
     }
 }
 
 app.get('/', (req, res) => {
     try {
-        const kecData = readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls');
-        const desaData = readRekapFile('rekap_wilayah_desa_2026-07-31.xls');
-        const pmlData = readRekapFile('rekap_petugas_pml_2026-07-31.xls');
-        const pclData = readRekapFile('rekap_petugas_pcl_2026-07-31.xls');
+        const kecStore = readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls');
+        const desaStore = readRekapFile('rekap_wilayah_desa_2026-07-31.xls');
+        const pmlStore = readRekapFile('rekap_petugas_pml_2026-07-31.xls');
+        const pclStore = readRekapFile('rekap_petugas_pcl_2026-07-31.xls');
 
-        const sortedPclDesc = [...pclData].sort((a, b) => b.harian - a.harian);
+        const sortedPclDesc = [...pclStore.objects].sort((a, b) => b.harian - a.harian);
         const topPcl = sortedPclDesc.slice(0, 5);
-        const bottomPcl = [...pclData].sort((a, b) => a.harian - b.harian).slice(0, 5);
+        const bottomPcl = [...pclStore.objects].sort((a, b) => a.harian - b.harian).slice(0, 5);
 
         res.render('index', {
             activeDate: '31 Juli 2026',
             topPcl: topPcl,
             bottomPcl: bottomPcl,
-            kecData: kecData,
-            desaData: desaData,
-            pmlData: pmlData,
-            pclData: pclData,
+            kecHeaders: kecStore.headers,
+            kecData: kecStore.objects,
+            desaHeaders: desaStore.headers,
+            desaData: desaStore.objects,
+            pmlHeaders: pmlStore.headers,
+            pmlData: pmlStore.objects,
+            pclHeaders: pclStore.headers,
+            pclData: pclStore.objects,
             desaHarianMap: {},
             pmlHarianMap: {},
             pclHarianMap: {}
