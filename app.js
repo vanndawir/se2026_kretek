@@ -71,6 +71,27 @@ function readRekapFile(filename) {
     }
 }
 
+// API Endpoints untuk mengantisipasi fetch dari frontend JavaScript
+app.get('/api/kecamatan', (req, res) => {
+    const store = readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls');
+    res.json(store.objects);
+});
+
+app.get('/api/desa', (req, res) => {
+    const store = readRekapFile('rekap_wilayah_desa_2026-07-31.xls');
+    res.json(store.objects);
+});
+
+app.get('/api/pml', (req, res) => {
+    const store = readRekapFile('rekap_petugas_pml_2026-07-31.xls');
+    res.json(store.objects);
+});
+
+app.get('/api/pcl', (req, res) => {
+    const store = readRekapFile('rekap_petugas_pcl_2026-07-31.xls');
+    res.json(store.objects);
+});
+
 app.get('/', (req, res) => {
     try {
         const kecStore = readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls');
@@ -86,7 +107,6 @@ app.get('/', (req, res) => {
             activeDate: '31 Juli 2026',
             topPcl: topPcl,
             bottomPcl: bottomPcl,
-            // Kirim kedua varian nama variabel agar cocok dengan EJS apa pun
             kecamatan: kecStore.objects,
             kecData: kecStore.objects,
             kecHeaders: kecStore.headers,
