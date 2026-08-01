@@ -8,12 +8,12 @@
         :root {
             --bg-color-start: #ea580c;
             --bg-color-end: #09090b;
-            --surface-color: #18181b;
-            --surface-card: #27272a;
+            --surface-color: rgba(35, 20, 15, 0.75);
+            --surface-card: rgba(50, 25, 20, 0.85);
             --text-main: #f4f4f5;
-            --text-muted: #a1a1aa;
-            --primary-orange: #f97316; 
-            --border-color: #3f3f46;
+            --text-muted: #d4d4d8;
+            --primary-orange: #fb923c; 
+            --border-color: rgba(249, 115, 22, 0.4);
         }
 
         /* --- SPLASH SCREEN (HALAMAN PEMBUKA) --- */
@@ -31,11 +31,11 @@
             transition: opacity 0.8s ease, visibility 0.8s ease;
         }
         .splash-logo {
-            width: 28vw;            /* Ukuran proposional merespons lebar layar */
-            max-width: 280px;      /* Batas maksimal agar tidak terlalu besar di PC */
-            min-width: 170px;      /* Batas minimal agar tetap jelas di HP kecil */
+            width: 28vw;            
+            max-width: 280px;      
+            min-width: 170px;      
             height: auto;
-            aspect-ratio: 1 / 1;   /* Menjaga bentuk tetap lingkaran sempurna */
+            aspect-ratio: 1 / 1;   
             object-fit: contain;
             border-radius: 50%;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
@@ -53,7 +53,7 @@
             background-attachment: fixed;
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             min-height: 100vh;
         }
         .container {
@@ -66,12 +66,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(24, 24, 27, 0.7);
+            background: rgba(35, 20, 15, 0.65);
             border: 1px solid var(--border-color);
-            padding: 15px 25px;
+            padding: 15px 20px;
             border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             backdrop-filter: blur(8px);
         }
         .logo-container {
@@ -81,7 +81,7 @@
             flex-shrink: 0;
         }
         .logo-container img {
-            height: 48px;
+            height: 45px;
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
@@ -90,27 +90,27 @@
         .header-title-area {
             text-align: center;
             flex-grow: 1;
-            margin: 0 15px;
+            margin: 0 10px;
             overflow: hidden;
         }
         h1 {
             color: #ffffff;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
             margin: 0 0 2px 0;
-            font-size: 20px;
+            font-size: 18px;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
         .title-se {
             color: var(--primary-orange);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             margin: 0 0 2px 0;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .subtitle {
-            color: #e4e4e7;
-            font-size: 13px;
+            color: #f3f4f6;
+            font-size: 12px;
             margin: 0 0 5px 0;
             font-weight: 500;
         }
@@ -120,17 +120,17 @@
             width: 100%;
             overflow: hidden;
             white-space: nowrap;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.25);
             border-radius: 4px;
             padding: 3px 0;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
         }
         .running-text {
             display: inline-block;
             padding-left: 100%;
             animation: marquee 16s linear infinite;
             color: #fed7aa;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
         @keyframes marquee {
@@ -138,118 +138,124 @@
             100% { transform: translate(-100%, 0); }
         }
 
+        /* Susunan Grid konsisten 2 Kolom di HP dan PC */
         .ranking-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
         }
         .ranking-card {
             background-color: var(--surface-color);
             border: 1px solid var(--border-color);
             border-top: 4px solid var(--primary-orange);
             border-radius: 10px;
-            padding: 15px 20px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            padding: 12px 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
         }
         .ranking-card.green-theme {
             border-top-color: #10b981;
         }
         .ranking-card.green-theme h3 {
-            color: #10b981;
+            color: #34d399;
         }
         .ranking-card h3 {
             margin-top: 0;
             color: var(--primary-orange);
-            font-size: 15px;
+            font-size: 13px;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
         .ranking-list {
             list-style: none;
             padding: 0;
-            margin: 10px 0 0 0;
+            margin: 8px 0 0 0;
         }
         .ranking-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
-            font-size: 13px;
-            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            padding: 5px 0;
+            font-size: 12px;
+            border-bottom: 1px dashed rgba(255,255,255,0.15);
         }
         .ranking-item:last-child { border-bottom: none; }
         .rank-name { color: var(--text-main); font-weight: 500; }
-        .rank-score { color: var(--primary-orange); font-weight: bold; background: rgba(249,115,22,0.15); padding: 2px 8px; border-radius: 4px; }
-        .rank-score.green-score { color: #10b981; background: rgba(16,185,129,0.15); }
+        .rank-score { color: var(--primary-orange); font-weight: bold; background: rgba(249,115,22,0.2); padding: 2px 6px; border-radius: 4px; }
+        .rank-score.green-score { color: #34d399; background: rgba(16,185,129,0.2); }
 
         .section-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
         }
         .card {
             background-color: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            padding: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
         }
         .card h3 {
             margin-top: 0;
             color: var(--primary-orange);
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-            font-size: 16px;
+            padding-bottom: 6px;
+            font-size: 13px;
         }
         select {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border-radius: 6px;
             background-color: var(--surface-card);
             color: var(--text-main);
             border: 1px solid var(--border-color);
-            font-size: 14px;
-            margin-bottom: 15px;
+            font-size: 12px;
+            margin-bottom: 12px;
             outline: none;
             cursor: pointer;
         }
         select:focus { border-color: var(--primary-orange); }
         .stat-box {
             background-color: var(--surface-card);
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
-            margin-top: 10px;
+            margin-top: 8px;
             border: 1px solid var(--border-color);
-            max-height: 250px;
+            max-height: 220px;
             overflow-y: auto;
         }
         .stat-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            margin-bottom: 6px;
+            border-bottom: 1px dashed rgba(255,255,255,0.15);
             padding-bottom: 4px;
-            font-size: 13px;
+            font-size: 12px;
         }
         .stat-label { color: var(--text-muted); }
         .stat-value { font-weight: 600; color: var(--text-main); }
         .badge-progres {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 4px;
             font-weight: bold;
             color: #fff;
-            font-size: 12px;
+            font-size: 11px;
         }
 
-        @media(max-width: 768px) {
-            .app-header { padding: 12px 15px; }
-            .logo-container img { height: 38px; }
-            h1 { font-size: 15px; }
-            .title-se { font-size: 14px; }
-            .subtitle { font-size: 11px; }
+        @media(max-width: 480px) {
+            body { padding: 8px; }
+            .app-header { padding: 10px; }
+            .logo-container img { height: 32px; }
+            h1 { font-size: 12px; }
+            .title-se { font-size: 12px; }
+            .subtitle { font-size: 10px; }
+            .ranking-card h3, .card h3 { font-size: 11px; }
+            .ranking-item, .stat-row, select { font-size: 11px; }
         }
     </style>
 </head>
@@ -281,7 +287,7 @@
         <!-- Rangking PCL Berdasarkan Progress Harian -->
         <div class="ranking-grid">
             <div class="ranking-card green-theme">
-                <h3>🔥 Top 5 PCL (Progress Harian Tertinggi)</h3>
+                <h3>🔥 Top 5 PCL (Progress Harian)</h3>
                 <ul class="ranking-list">
                     <% if (topPcl && topPcl.length > 0) { %>
                         <% topPcl.forEach((p, i) => { %>
@@ -297,13 +303,13 @@
             </div>
 
             <div class="ranking-card" style="border-top-color: #ef4444;">
-                <h3 style="color: #ef4444;">⚠️ 5 PCL (Progress Harian Terendah)</h3>
+                <h3 style="color: #ef4444;">⚠️ 5 PCL (Progress Terendah)</h3>
                 <ul class="ranking-list">
                     <% if (bottomPcl && bottomPcl.length > 0) { %>
                         <% bottomPcl.forEach((p, i) => { %>
                             <li class="ranking-item">
                                 <span class="rank-name"><%= i + 1 %>. <%= p.name || '-' %></span>
-                                <span class="rank-score" style="color: #ef4444; background: rgba(239,68,68,0.15);">+<%= p.harian %> Responden</span>
+                                <span class="rank-score" style="color: #ef4444; background: rgba(239,68,68,0.2);">+<%= p.harian %> Responden</span>
                             </li>
                         <% }) %>
                     <% } else { %>
@@ -342,7 +348,18 @@
                 <select id="selectPml" onchange="updateDetail('pml')">
                     <option value="">-- Pilih PML --</option>
                     <% pmlData.forEach((row, i) => { %>
-                        <option value="<%= i %>"><%= row[1] || 'PML ' + (i+1) %></option>
+                        <% 
+                            let pmlName = '';
+                            for (let c = 0; c < row.length; c++) {
+                                let val = String(row[c] || '').trim();
+                                if (val && isNaN(val) && val.length > 2) {
+                                    pmlName = val;
+                                    break;
+                                }
+                            }
+                            if (!pmlName) pmlName = row[1] || ('PML ' + (i+1));
+                        %>
+                        <option value="<%= i %>"><%= pmlName %></option>
                     <% }) %>
                 </select>
                 <div id="detailPml" class="stat-box" style="display:none;"></div>
@@ -353,7 +370,18 @@
                 <select id="selectPcl" onchange="updateDetail('pcl')">
                     <option value="">-- Pilih PCL --</option>
                     <% pclData.forEach((row, i) => { %>
-                        <option value="<%= i %>"><%= row[1] || 'PCL ' + (i+1) %></option>
+                        <% 
+                            let pclName = '';
+                            for (let c = 0; c < row.length; c++) {
+                                let val = String(row[c] || '').trim();
+                                if (val && isNaN(val) && val.length > 2) {
+                                    pclName = val;
+                                    break;
+                                }
+                            }
+                            if (!pclName) pclName = row[1] || ('PCL ' + (i+1));
+                        %>
+                        <option value="<%= i %>"><%= pclName %></option>
                     <% }) %>
                 </select>
                 <div id="detailPcl" class="stat-box" style="display:none;"></div>
@@ -368,7 +396,7 @@
                 const splash = document.getElementById('splash-screen');
                 splash.style.opacity = '0';
                 splash.style.visibility = 'hidden';
-            }, 2000); // Durasi tampil 2 detik
+            }, 2000);
         });
 
         const dataStore = {
@@ -410,6 +438,17 @@
             return '0%';
         }
 
+        function getDynamicName(row) {
+            if (!row) return '';
+            for (let c = 0; c < row.length; c++) {
+                let val = String(row[c] || '').trim();
+                if (val && isNaN(val) && val.length > 2) {
+                    return val;
+                }
+            }
+            return row[1] || '';
+        }
+
         function updateDetail(type) {
             const select = document.getElementById('select' + type.charAt(0).toUpperCase() + type.slice(1));
             const box = document.getElementById('detail' + type.charAt(0).toUpperCase() + type.slice(1));
@@ -436,7 +475,7 @@
                     <div class="stat-row"><span class="stat-label">Responden Didata:</span> <span class="stat-value">${didata}</span></div>
                     <div class="stat-row">
                         <span class="stat-label">% Didata</span>
-                        <span class="stat-value" style="color: var(--primary-orange); font-size: 16px;">${persen}</span>
+                        <span class="stat-value" style="color: var(--primary-orange); font-size: 15px;">${persen}</span>
                     </div>
                 `;
             } else if (type === 'desa') {
@@ -467,7 +506,7 @@
                     <div class="stat-row"><span class="stat-label">Total Usaha Keluarga:</span> <span class="stat-value">${totalUsaha}</span></div>
                 `;
             } else if (type === 'pcl' || type === 'pml') {
-                const name = row[1] ? String(row[1]).trim() : '';
+                const name = getDynamicName(row);
                 const subSls = row[4] !== undefined && row[4] !== '' ? row[4] : getValueByKeywords(headers, row, ['sub-sls', 'sls']);
                 const didata = parseInt(getValueByKeywords(headers, row, ['responden didata', 'didata'])) || 0;
                 const targetPrelist = parseInt(getValueByKeywords(headers, row, ['target prelist', 'target'])) || 0;
@@ -492,7 +531,7 @@
             box.innerHTML = html;
         }
     </script>
-    <div style="text-align: center; padding: 30px 0 20px 0; color: #888; font-size: 13px;">
+    <div style="text-align: center; padding: 25px 0 15px 0; color: #f3f4f6; font-size: 12px; opacity: 0.8;">
         Desain &amp; Website by <b>vanndawir</b>
     </div>
 </body>
