@@ -33,17 +33,33 @@ function readRekapFile(filename) {
         const headers = rawData[1] || rawData[0] || [];
         const rows = rawData.slice(2).filter(r => r && r.length > 0);
 
-        const objects = rows.map(row => ({
-            no: row[0] || '',
-            nama: row[1] || '-',
-            email: row[2] || '-',
-            role: row[3] || 'PPL',
-            subSlv: row[4] || 0,
-            target: parseFloat(row[5]) || 0,
-            didata: parseFloat(row[6]) || 0,
-            harian: parseFloat(row[7]) || 0,
-            persen: row[8] || '0%'
-        }));
+        const objects = rows.map(row => {
+            // Deteksi otomatis teks yang valid sebagai nama orang
+            let foundName = '-';
+            for (let i = 0; i < row.length; i++) {
+                const val = row[i];
+                if (typeof val === 'string' && val.trim().length > 2 && !val.includes('@') && !val.includes('%') && isNaN(val)) {
+                    foundName = val.trim();
+                    break;
+                }
+            }
+            if (foundName === '-' && row[1]) foundName = String(row[1]).trim();
+
+            return {
+                no: row[0] || '',
+                nama: foundName,
+                name: foundName,
+                Nama: foundName,
+                namaPetugas: foundName,
+                email: row[2] || '-',
+                role: row[3] || 'PPL',
+                subSlv: row[4] || 0,
+                target: parseFloat(row[5]) || 0,
+                didata: parseFloat(row[6]) || 0,
+                harian: parseFloat(row[7]) || 0,
+                persen: row[8] || '0%'
+            };
+        });
 
         return { headers, rows, objects };
     } catch (e) {
