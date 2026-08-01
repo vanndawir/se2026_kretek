@@ -12,7 +12,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Fungsi universal pembaca file Excel (.xls format HTML) di folder data/2026-07-31/
 function readRekapFile(filename) {
     try {
         const filePath = path.join(__dirname, 'data', '2026-07-31', filename);
@@ -27,19 +26,18 @@ function readRekapFile(filename) {
         const worksheet = workbook.Sheets[sheetName];
         const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
-        // Baris 0 & 1 adalah header ganda tabel, data riil mulai baris ke-2
         const rows = rawData.slice(2).filter(r => r && r.length > 0);
 
         return rows.map(row => ({
-            no: row[0],
-            nama: row[1] || '-',         // Kolom Nama Petugas
-            email: row[2] || '-',        // Kolom Email
-            role: row[3] || 'PPL',       // Kolom Role (PPL/PML)
-            subSlv: row[4] || 0,         // Sub-SLS Diampu
-            target: parseFloat(row[5]) || 0,  // Target Prelist
-            didata: parseFloat(row[6]) || 0,  // Responden Didata
-            harian: parseFloat(row[7]) || 0,  // + Didata (Progress Harian)
-            persen: row[8] || '0%'       // % Didata
+            no: row[0] || '',
+            nama: row[1] || '-',
+            email: row[2] || '-',
+            role: row[3] || 'PPL',
+            subSlv: row[4] || 0,
+            target: parseFloat(row[5]) || 0,
+            didata: parseFloat(row[6]) || 0,
+            harian: parseFloat(row[7]) || 0,
+            persen: row[8] || '0%'
         }));
     } catch (e) {
         console.error(`Gagal membaca ${filename}:`, e.message);
@@ -48,32 +46,32 @@ function readRekapFile(filename) {
 }
 
 app.get('/', (req, res) => {
-    // Baca data dari folder data/2026-07-31/
-    const kecData = readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls');
-    const desaData = readRekapFile('rekap_wilayah_desa_2026-07-31.xls');
-    const pmlData = readRekapFile('rekap_petugas_pml_2026-07-31.xls');
-    const pclData = readRekapFile('rekap_petugas_pcl_2026-07-31.xls');
+    try {
+        const kecData = readRekapFile('rekap_wilayah_kecamatan_2026-07-31.xls');
+        const desaData = readRekapFile('rekap_wilayah_desa_2026-07-31.xls');
+        const pmlData = readRekapFile('rekap_petugas_pml_2026-07-31.xls');
+        const pclData = readRekapFile('rekap_petugas_pcl_2026-07-31.xls');
 
-    // Urutkan PCL berdasarkan progress harian tertinggi untuk Top 5
-    const sortedPclDesc = [...pclData].sort((a, b) => b.harian - a.harian);
-    const topPcl = sortedPclDesc.slice(0, 5);
+        const sortedPclDesc = [...pclData].sort((a, b) => b.harian - a.harian);
+        const topPcl = sortedPclDesc.slice(0, 5);
+        const bottomPcl = [...pclData].sort((a, b) => a.harian - b.harian).slice(0, 5);
 
-    // Urutkan PCL berdasarkan progress harian terendah untuk 5 PCL Progress Terendah
-    const sortedPclAsc = [...pclData].sort((a, b) => a.harian - b.harian);
-    const bottomPcl = sortedPclAsc.slice(0, 5);
-
-    res.render('index', {
-        activeDate: '31 Juli 2026',
-        topPcl: topPcl,
-        bottomPcl: bottomPcl,
-        kecData: kecData,
-        desaData: desaData,
-        pmlData: pmlData,
-        pclData: pclData,
-        desaHarianMap: {},
-        pmlHarianMap: {},
-        pclHarianMap: {}
-    });
+        res.render('index', {
+            activeDate: '31 Juli 2026',
+            topPcl: topPcl,
+            bottomPcl: bottomPcl,
+            kecData: kecData,
+            desaData: desaData,
+            pmlData: pmlData,
+            pclData: pclData,
+            desaHarianMap: {},
+            pmlHarianMap: {},
+            pclHarianMap: {}
+        });
+    } catch (err) {
+        console.error("Render Error:", err);
+        res.status(500).send("Terjadi kesalahan pada server: " + err.message);
+    }
 });
 
 app.listen(PORT, () => {
