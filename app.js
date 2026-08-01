@@ -14,9 +14,13 @@ app.use(express.json());
 
 function readRekapFile(filename) {
     try {
-        const filePath = path.join(__dirname, 'data', '2026-07-31', filename);
+        let filePath = path.join(__dirname, filename);
         if (!fs.existsSync(filePath)) {
-            console.warn(`File tidak ditemukan: ${filePath}`);
+            filePath = path.join(__dirname, 'data', '2026-07-31', filename);
+        }
+
+        if (!fs.existsSync(filePath)) {
+            console.warn(`File tidak ditemukan: ${filename}`);
             return [];
         }
         
