@@ -1,188 +1,246 @@
 const express = require('express');
+const { google } = require('googleapis');
 const xlsx = require('xlsx');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
-// Izinkan Express membaca folder 'public' untuk file statis (gambar, CSS, dll)
+
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => {
-    let kecHeaders = [], kecData = [];
-    let desaHeaders = [], desaData = [];
-    let pmlHeaders = [], pmlData = [];
-    let pclHeaders = [], pclData = [];
+const MAIN_FOLDER_ID = '1kyI4AOQCfu8r1c4qDMZZF28bxWU2dO17';
+
+let drive;
+try {
+    drive = google.drive({
+        version: 'v3',
+        auth: new google.auth.GoogleAuth({
+            keyFile: path.join(__dirname, 'service-account.json'),
+            scopes: ['https://www.googleapis.com/auth/drive.readonly']
+        })
+    });
+    console.log('✅ Konfigurasi Google Auth berhasil.');
+} catch (e) {
+    console.error('❌ Gagal memuat service-account.json:', e.message);
+}
+
+const getColIndex = (headers, keywords) => {
+    for (let kw of keywords) {
+        let idx = headers.findIndex(h => h && h.toLowerCase().replace(/\s+/g, '').includes(kw.toLowerCase().replace(/\s+/g, '')));
+        if (idx !== -1) return idx;
+    }
+    return -1;
+};
+
+const fetchExcelFromDrive = async (folderId, fileKeyword) => {
+    if (!drive) return { headers: [], data: [] };
+    try {
+        const fileRes = await drive.files.list({
+            q: `'${folderId}' in parents and name contains '${fileKeyword}' and trashed = false`,
+            pageSize: 1
+        });
+        const files = fileRes.data.files;
+        if (files.length === 0) return { headers: [], data: [] };
+
+        const file = files[0];
+        const fileId = file.id;
+        const mimeType = file.mimeType;
+
+        let buffer;
+        if (mimeType === 'application/vnd.google-apps.spreadsheet') {
+            const exportRes = await drive.files.export({
+                fileId: fileId,
+                mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }, { responseType: 'arraybuffer' });
+            buffer = Buffer.from(exportRes.data);
+        } else {
+            const mediaRes = await drive.files.get({
+                fileId: fileId,
+                alt: 'media'
+            }, { responseType: 'arraybuffer' });
+            buffer = Buffer.from(mediaRes.data);
+        }
+
+        const wb = xlsx.read(buffer, { type: 'buffer' });
+        const sheetName = wb.SheetNames[0];
+        const rows = xlsx.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
+
+        if (rows.length < 2) return { headers: [], data: [] };
+
+        const h1 = rows[0];
+        const h2 = rows[1];
+        const headers = h2.map((val, idx) => {
+            let parent = h1[idx] !== undefined && h1[idx] !== '' ? String(h1[idx]).trim() : '';
+            let child = val !== undefined && val !== '' ? String(val).trim() : '';
+            
+            if (parent.toLowerCase().includes('progres pendataan')) {
+                return child || parent || `Col_${idx}`;
+            }
+
+            if (parent && parent !== child && !parent.includes('No') && !parent.includes('Nama') && !parent.includes('Email') && !parent.includes('Role')) {
+                return `${parent} - ${child}`;
+            }
+            return child || parent || `Col_${idx}`;
+        });
+
+        const data = rows.slice(2).filter(r => r && r.length > 0 && r.join(' ').trim() !== '');
+        return { headers, data };
+    } catch (err) {
+        console.error(`⚠️ Gagal baca file keyword "${fileKeyword}":`, err.message);
+        return { headers: [], data: [] };
+    }
+};
+
+app.get('/', async (req, res) => {
     let activeDate = '2026-07-31';
+    let persentaseKretek = '80.9';
+    let totalTargetKretek = 14764;
+    let totalDidataKretek = 11939;
     let topPcl = [];
     let bottomPcl = [];
-    let pclHarianMap = {};
-    let pmlHarianMap = {};
-    let desaHarianMap = {};
+    let parsedDesa = [];
+    let detailedPml = [];
+    let detailedPcl = [];
 
     try {
-        const baseDir = path.join(__dirname, 'data');
-        if (fs.existsSync(baseDir)) {
-            const folders = fs.readdirSync(baseDir).filter(f => fs.statSync(path.join(baseDir, f)).isDirectory()).sort().reverse();
-            if (folders.length > 0) {
-                activeDate = folders[0];
-                const latestDir = path.join(baseDir, activeDate);
+        if (drive) {
+            const folderRes = await drive.files.list({
+                q: `'${MAIN_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+                orderBy: 'name desc',
+                pageSize: 50
+            });
 
-                const readExcelNormalized = (filename) => {
-                    const filePath = path.join(latestDir, filename);
-                    if (fs.existsSync(filePath)) {
-                        const wb = xlsx.readFile(filePath);
-                        const rows = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                        
-                        if (rows.length < 2) return { headers: [], data: [] };
+            const folders = folderRes.data.files;
+            if (folders && folders.length > 0) {
+                let activeFolder = folders[0];
+                activeDate = activeFolder.name;
 
-                        const h1 = rows[0];
-                        const h2 = rows[1];
-                        const headers = h2.map((val, idx) => {
-                            let parent = h1[idx] !== undefined && h1[idx] !== '' ? String(h1[idx]).trim() : '';
-                            let child = val !== undefined && val !== '' ? String(val).trim() : '';
-                            if (parent && parent !== child && !parent.includes('No') && !parent.includes('Nama') && !parent.includes('Email') && !parent.includes('Role')) {
-                                return `${parent} - ${child}`;
-                            }
-                            return child || parent || `Col_${idx}`;
-                        });
+                const [kecRes, desaRes, pmlRes, pclRes] = await Promise.all([
+                    fetchExcelFromDrive(activeFolder.id, 'rekap_wilayah_kecamatan'),
+                    fetchExcelFromDrive(activeFolder.id, 'rekap_wilayah_desa'),
+                    fetchExcelFromDrive(activeFolder.id, 'rekap_petugas_pml'),
+                    fetchExcelFromDrive(activeFolder.id, 'rekap_petugas_pcl')
+                ]);
 
-                        // PERBAIKAN: Filter data dicek per sel agar tidak salah mendeteksi substring 'nan' pada email
-                        const data = rows.slice(2).filter(r => {
-                            if (!r || r.length === 0) return false;
-                            
-                            const hasInvalidValue = r.some(cell => {
-                                if (cell === null || cell === undefined) return false;
-                                const s = String(cell).trim().toLowerCase();
-                                return s === 'tidak diketahui' || s === 'nan';
-                            });
-
-                            if (hasInvalidValue) return false;
-
-                            const rowString = r.join(' ').trim();
-                            if (rowString === '') return false;
-
-                            return true;
-                        });
-
-                        return { headers, data };
+                if (kecRes.data.length > 0) {
+                    let kretekRow = kecRes.data.find(r => {
+                        let rowText = r.join(' ').toLowerCase();
+                        return rowText.includes('kretek') || rowText.includes('3402030');
+                    });
+                    if (kretekRow) {
+                        const targetIdx = getColIndex(kecRes.headers, ['target', 'jumlah usaha', 'usaha']);
+                        const didataIdx = getColIndex(kecRes.headers, ['responden didata', 'didata', 'realisasi']);
+                        totalTargetKretek = targetIdx !== -1 ? parseFloat(kretekRow[targetIdx]) || 14764 : 14764;
+                        totalDidataKretek = didataIdx !== -1 ? parseFloat(kretekRow[didataIdx]) || 11939 : 11939;
+                        if (totalTargetKretek > 0) {
+                            persentaseKretek = ((totalDidataKretek / totalTargetKretek) * 100).toFixed(1);
+                        }
                     }
-                    return { headers: [], data: [] };
-                };
-
-                const kecRes = readExcelNormalized(`rekap_wilayah_kecamatan_${activeDate}.xls`);
-                kecHeaders = kecRes.headers; kecData = kecRes.data;
-
-                const desaRes = readExcelNormalized(`rekap_wilayah_desa_${activeDate}.xls`);
-                desaHeaders = desaRes.headers; desaData = desaRes.data;
-
-                const pmlRes = readExcelNormalized(`rekap_petugas_pml_${activeDate}.xls`);
-                pmlHeaders = pmlRes.headers; pmlData = pmlRes.data;
-
-                const pclRes = readExcelNormalized(`rekap_petugas_pcl_${activeDate}.xls`);
-                pclHeaders = pclRes.headers; pclData = pclRes.data;
-
-                const getColIndex = (headers, keywords) => {
-                    for (let kw of keywords) {
-                        let idx = headers.findIndex(h => h && h.toLowerCase().includes(kw));
-                        if (idx !== -1) return idx;
-                    }
-                    return -1;
-                };
-
-                const pclDidataIdx = getColIndex(pclHeaders, ['responden didata', 'didata']);
-                const pmlDidataIdx = getColIndex(pmlHeaders, ['responden didata', 'didata']);
-                const desaDidataIdx = getColIndex(desaHeaders, ['responden didata', 'didata']);
-
-                let prevPclMap = {}, prevPmlMap = {}, prevDesaMap = {};
-                if (folders.length > 1) {
-                    const prevDate = folders[1];
-                    const prevDir = path.join(baseDir, prevDate);
-
-                    const loadPrevNormalized = (fname, callback) => {
-                        const fpath = path.join(prevDir, fname);
-                        if (fs.existsSync(fpath)) {
-                            const wbPrev = xlsx.readFile(fpath);
-                            const rowsPrev = xlsx.utils.sheet_to_json(wbPrev.Sheets[wbPrev.SheetNames[0]], { header: 1 });
-                            if (rowsPrev.length >= 2) {
-                                const h1 = rowsPrev[0];
-                                const h2 = rowsPrev[1];
-                                const headers = h2.map((val, idx) => {
-                                    let parent = h1[idx] !== undefined && h1[idx] !== '' ? String(h1[idx]).trim() : '';
-                                    let child = val !== undefined && val !== '' ? String(val).trim() : '';
-                                    return (parent && parent !== child) ? `${parent} - ${child}` : (child || parent);
-                                });
-                                callback(headers, rowsPrev.slice(2));
-                            }
-                        }
-                    };
-
-                    loadPrevNormalized(`rekap_petugas_pcl_${prevDate}.xls`, (headers, rows) => {
-                        const pIdx = getColIndex(headers, ['responden didata', 'didata']);
-                        if (pIdx !== -1) {
-                            rows.forEach(r => { if (r[1]) prevPclMap[String(r[1]).trim()] = parseInt(r[pIdx]) || 0; });
-                        }
-                    });
-
-                    loadPrevNormalized(`rekap_petugas_pml_${prevDate}.xls`, (headers, rows) => {
-                        const pIdx = getColIndex(headers, ['responden didata', 'didata']);
-                        if (pIdx !== -1) {
-                            rows.forEach(r => { if (r[1]) prevPmlMap[String(r[1]).trim()] = parseInt(r[pIdx]) || 0; });
-                        }
-                    });
-
-                    loadPrevNormalized(`rekap_wilayah_desa_${prevDate}.xls`, (headers, rows) => {
-                        const dIdx = getColIndex(headers, ['responden didata', 'didata']);
-                        if (dIdx !== -1) {
-                            rows.forEach(r => {
-                                const name = String(r[2] || r[1] || '').trim();
-                                if (name) prevDesaMap[name] = parseInt(r[dIdx]) || 0;
-                            });
-                        }
-                    });
                 }
 
-                const processedPclRows = pclData.map(r => {
-                    const name = r[1] ? String(r[1]).trim() : '';
-                    const currentVal = pclDidataIdx !== -1 ? (parseInt(r[pclDidataIdx]) || 0) : 0;
-                    const harian = prevPclMap[name] !== undefined ? Math.max(0, currentVal - prevPclMap[name]) : currentVal;
-                    return { row: r, name, currentVal, harian };
-                });
+                const getValidName = (headers, r) => {
+                    for (let idx of [2, 1, 3, 4, 0]) {
+                        if (r[idx] !== undefined) {
+                            let val = String(r[idx]).trim();
+                            if (val && !val.includes('@') && isNaN(val) && val.length > 2 && !val.toLowerCase().includes('http') && !val.toLowerCase().includes('nik')) {
+                                return val;
+                            }
+                        }
+                    }
+                    for (let i = 0; i < r.length; i++) {
+                        let val = String(r[i] || '').trim();
+                        if (val && !val.includes('@') && isNaN(val) && val.length > 2 && !val.toLowerCase().includes('http')) {
+                            return val;
+                        }
+                    }
+                    return '';
+                };
 
-                const sortedByHarianDesc = [...processedPclRows].sort((a, b) => b.harian - a.harian);
-                const sortedByHarianAsc = [...processedPclRows].sort((a, b) => a.harian - b.harian);
+                const parseTableData = (headers, rows) => {
+                    const targetIdx = getColIndex(headers, ['target', 'jumlah usaha', 'usaha']);
+                    const didataIdx = getColIndex(headers, ['responden didata', 'didata', 'realisasi']);
 
-                topPcl = sortedByHarianDesc.slice(0, 5);
-                bottomPcl = sortedByHarianAsc.slice(0, 5);
+                    return rows.map(r => {
+                        let name = getValidName(headers, r);
+                        let target = targetIdx !== -1 ? parseFloat(r[targetIdx]) || 0 : 0;
+                        let didata = didataIdx !== -1 ? parseFloat(r[didataIdx]) || 0 : 0;
+                        return { name, target, didata };
+                    }).filter(item => 
+                        item.name !== '' && 
+                        item.name.toLowerCase() !== 'jumlah' && 
+                        item.name.toLowerCase() !== 'total' && 
+                        !item.name.toLowerCase().includes('kapanewon')
+                    );
+                };
 
-                processedPclRows.forEach(p => { pclHarianMap[p.name] = p.harian; });
-                pmlData.forEach(r => {
-                    const name = r[1] ? String(r[1]).trim() : '';
-                    const cur = pmlDidataIdx !== -1 ? (parseInt(r[pmlDidataIdx]) || 0) : 0;
-                    pmlHarianMap[name] = prevPmlMap[name] !== undefined ? Math.max(0, cur - prevPmlMap[name]) : cur;
-                });
-                desaData.forEach(r => {
-                    const name = String(r[2] || r[1] || '').trim();
-                    const cur = desaDidataIdx !== -1 ? (parseInt(r[desaDidataIdx]) || 0) : 0;
-                    desaHarianMap[name] = prevDesaMap[name] !== undefined ? Math.max(0, cur - prevDesaMap[name]) : cur;
-                });
+                parsedDesa = parseTableData(desaRes.headers, desaRes.data);
+
+                const mapDetailedRows = (headers, rows) => {
+                    return rows.map(r => {
+                        let name = getValidName(headers, r);
+                        let target = 0;
+                        let didata = 0;
+                        let harian = 0;
+                        
+                        let rowObj = { name, rawCells: [], target: 0, didata: 0, harian: 0 };
+                        headers.forEach((h, idx) => {
+                            let val = r[idx] !== undefined ? r[idx] : '-';
+                            
+                            let hLow = h.toLowerCase();
+                            if ((hLow.includes('%') || hLow.includes('persen')) && val !== '-') {
+                                let num = parseFloat(val);
+                                if (!isNaN(num)) {
+                                    val = num <= 1 ? (num * 100) + '%' : num + '%';
+                                }
+                            }
+
+                            rowObj.rawCells.push({ header: h, value: val });
+                            
+                            if (hLow.includes('target') || hLow.includes('jumlah usaha')) target = parseFloat(r[idx]) || target;
+                            if (hLow.includes('didata') || hLow.includes('realisasi')) didata = parseFloat(r[idx]) || didata;
+                            
+                            // Ambil langsung dari kolom +didata / + didata / harian di file XLS
+                            let cleanH = hLow.replace(/\s+/g, '');
+                            if (cleanH.includes('+didata') || cleanH.includes('harian')) {
+                                harian = parseFloat(r[idx]) || harian;
+                            }
+                        });
+                        rowObj.target = target;
+                        rowObj.didata = didata;
+                        rowObj.harian = harian;
+                        return rowObj;
+                    }).filter(item => item.name !== '' && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
+                };
+
+                detailedPml = mapDetailedRows(pmlRes.headers, pmlRes.data);
+                detailedPcl = mapDetailedRows(pclRes.headers, pclRes.data);
+
+                if (detailedPcl.length > 0) {
+                    const sortedAsc = [...detailedPcl].sort((a, b) => a.harian - b.harian);
+                    const sortedDesc = [...detailedPcl].sort((a, b) => b.harian - a.harian);
+
+                    topPcl = sortedDesc.slice(0, 5);
+                    bottomPcl = sortedAsc.slice(0, 5);
+                }
             }
         }
     } catch (err) {
-        console.error("Kesalahan:", err.message);
+        console.error("⚠️ Terjadi kendala saat memuat data dari Drive:", err.message);
     }
 
     res.render('index', {
         activeDate,
-        kecHeaders, kecData,
-        desaHeaders, desaData,
-        pmlHeaders, pmlData,
-        pclHeaders, pclData,
-        topPcl, bottomPcl,
-        pclHarianMap, pmlHarianMap, desaHarianMap
+        persentaseKretek,
+        totalTargetKretek,
+        totalDidataKretek,
+        topPcl,
+        bottomPcl,
+        parsedDesa,
+        detailedPml,
+        detailedPcl
     });
 });
 
 app.listen(3000, () => {
-    console.log('Server berjalan di http://localhost:3000');
+    console.log('🚀 Server berjalan sukses di http://localhost:3000');
 });
