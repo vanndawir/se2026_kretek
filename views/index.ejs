@@ -4,467 +4,357 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoring Lapangan SE2026 - Kapanewon Kretek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color-start: #ea580c;
-            --bg-color-end: #09090b;
-            --surface-color: #18181b;
-            --surface-card: #27272a;
-            --text-main: #f4f4f5;
-            --text-muted: #a1a1aa;
-            --primary-orange: #f97316; 
-            --border-color: #3f3f46;
-        }
-
-        /* --- SPLASH SCREEN (HALAMAN PEMBUKA) --- */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--bg-color-start) 0%, var(--bg-color-end) 60%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-        }
-        .splash-logo {
-            width: 28vw;            /* Ukuran proposional merespons lebar layar */
-            max-width: 280px;      /* Batas maksimal agar tidak terlalu besar di PC */
-            min-width: 170px;      /* Batas minimal agar tetap jelas di HP kecil */
-            height: auto;
-            aspect-ratio: 1 / 1;   /* Menjaga bentuk tetap lingkaran sempurna */
-            object-fit: contain;
-            border-radius: 50%;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-            animation: pulseLogo 2s infinite ease-in-out;
-        }
-        @keyframes pulseLogo {
-            0% { transform: scale(0.95); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(0.95); }
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg-color-start) 0%, var(--bg-color-end) 60%);
-            background-attachment: fixed;
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #090d16 0%, #171f2f 50%, #1a1006 100%);
             min-height: 100vh;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .font-mono-telemetry {
+            font-family: 'JetBrains Mono', monospace;
         }
-
-        /* Header & Logos */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(24, 24, 27, 0.7);
-            border: 1px solid var(--border-color);
-            padding: 15px 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
+        .glass-card { 
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(20, 27, 43, 0.9) 100%); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(249, 115, 22, 0.25); 
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        @keyframes blink-fast {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.15; }
         }
-        .logo-container img {
-            height: 48px;
-            width: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
-
-        .header-title-area {
-            text-align: center;
-            flex-grow: 1;
-            margin: 0 20px;
-        }
-        h1 {
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            margin: 0 0 5px 0;
-            font-size: 24px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .subtitle {
-            margin: 0;
-        }
-        .subtitle-region {
-            font-size: 16px;
-            font-weight: bold;
-            color: #fed7aa;
-        }
-        .subtitle-date {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-left: 6px;
-        }
-
-        .ranking-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .ranking-card {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-top: 4px solid var(--primary-orange);
-            border-radius: 10px;
-            padding: 15px 20px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-        }
-        .ranking-card.green-theme {
-            border-top-color: #10b981;
-        }
-        .ranking-card.green-theme h3 {
-            color: #10b981;
-        }
-        .ranking-card h3 {
-            margin-top: 0;
-            color: var(--primary-orange);
-            font-size: 15px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-        }
-        .ranking-list {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0 0 0;
-        }
-        .ranking-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
-            font-size: 13px;
-            border-bottom: 1px dashed rgba(255,255,255,0.1);
-        }
-        .ranking-item:last-child { border-bottom: none; }
-        .rank-name { color: var(--text-main); font-weight: 500; }
-        .rank-score { color: var(--primary-orange); font-weight: bold; background: rgba(249,115,22,0.15); padding: 2px 8px; border-radius: 4px; }
-        .rank-score.green-score { color: #10b981; background: rgba(16,185,129,0.15); }
-
-        .section-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .card {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-        }
-        .card h3 {
-            margin-top: 0;
-            color: var(--primary-orange);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-            font-size: 16px;
-        }
-        select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            background-color: var(--surface-card);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            font-size: 14px;
-            margin-bottom: 15px;
-            outline: none;
-            cursor: pointer;
-        }
-        select:focus { border-color: var(--primary-orange); }
-        .stat-box {
-            background-color: var(--surface-card);
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 10px;
-            border: 1px solid var(--border-color);
-            max-height: 250px;
-            overflow-y: auto;
-        }
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            border-bottom: 1px dashed rgba(255,255,255,0.1);
-            padding-bottom: 4px;
-            font-size: 13px;
-        }
-        .stat-label { color: var(--text-muted); }
-        .stat-value { font-weight: 600; color: var(--text-main); }
-        .badge-progres {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            color: #fff;
-            font-size: 12px;
-        }
-
-        @media(max-width: 768px) {
-            .app-header { flex-direction: column; gap: 15px; text-align: center; }
-            .header-title-area { margin: 0; }
+        .animate-blink {
+            animation: blink-fast 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
     </style>
 </head>
-<body>
-    <!-- SPLASH SCREEN / GAMBAR PEMBUKA -->
-    <div id="splash-screen">
-        <img src="/images/logo_kretek.png" alt="Logo Kapanewon Kretek" class="splash-logo">
+<body class="text-slate-100 min-h-screen antialiased selection:bg-orange-500 selection:text-white">
+
+    <!-- Splash Screen -->
+    <div id="welcomeSplash" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-700">
+        <img src="/images/logo_kretek.png" alt="Logo Kapanewon Kretek" class="h-44 sm:h-60 w-auto object-contain animate-pulse drop-shadow-2xl" onerror="this.style.display='none'">
+        <p class="text-xs text-orange-400 font-bold mt-4 tracking-widest uppercase">Memuat Portal SE2026...</p>
     </div>
 
-    <div class="container">
-        <!-- Header dengan Logo BPS (Kiri) & Logo Sensus Ekonomi (Kanan) -->
-        <header class="app-header">
-            <div class="logo-container" title="Logo BPS">
-                <img src="/images/logo_bps.png" alt="Logo BPS">
-            </div>
-            <div class="header-title-area">
-                <h1>Monitoring Lapangan SE2026</h1>
-                <div class="subtitle">
-                    <span class="subtitle-region">Kapanewon Kretek</span>
-                    <span class="subtitle-date">&mdash; Data Tanggal: <%= activeDate %></span>
+    <!-- Header -->
+    <header class="glass-card sticky top-0 z-50 border-b border-orange-500/30 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+            <div class="flex items-center space-x-3.5 flex-shrink-0">
+                <img src="/images/logo_bps.png" alt="Logo BPS" class="h-12 sm:h-14 w-auto object-contain drop-shadow" onerror="this.style.display='none'">
+                <div class="hidden sm:block border-l border-slate-700/80 pl-3.5">
+                    <span class="block text-xs uppercase tracking-widest text-orange-400 font-bold">Kapanewon</span>
+                    <span class="text-base sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-orange-400 to-amber-200 bg-clip-text text-transparent">Kretek</span>
                 </div>
             </div>
-            <div class="logo-container" title="Logo Sensus Ekonomi 2026">
-                <img src="/images/logo_se.png" alt="Logo Sensus Ekonomi">
-            </div>
-        </header>
 
-        <!-- Rangking PCL Berdasarkan Jumlah Responden Didata -->
-        <div class="ranking-grid">
-            <div class="ranking-card green-theme">
-                <h3>🔥 Top 5 PCL (Responden Didata Tertinggi)</h3>
-                <ul class="ranking-list">
-                    <% if (topPcl && topPcl.length > 0) { %>
-                        <% topPcl.forEach((p, i) => { %>
-                            <li class="ranking-item">
-                                <span class="rank-name"><%= i + 1 %>. <%= p.name || '-' %></span>
-                                <span class="rank-score green-score"><%= p.didata !== undefined ? p.didata : p.harian %> Responden</span>
-                            </li>
-                        <% }) %>
-                    <% } else { %>
-                        <li class="ranking-item"><span class="rank-name">Belum ada data</span></li>
-                    <% } %>
-                </ul>
+            <div class="flex-1 text-center px-2">
+                <h1 class="text-xs sm:text-base font-extrabold tracking-tight text-white uppercase drop-shadow">Monitoring Lapangan SE2026</h1>
+                <div class="mt-1">
+                    <span class="inline-block text-xs font-extrabold text-amber-300 tracking-wider animate-blink bg-orange-950/40 px-3 py-0.5 rounded-full border border-orange-500/30">
+                        📅 Update Data Tanggal: <%= activeDate %>
+                    </span>
+                </div>
             </div>
 
-            <div class="ranking-card" style="border-top-color: #ef4444;">
-                <h3 style="color: #ef4444;">⚠️ 5 PCL (Responden Didata Terendah)</h3>
-                <ul class="ranking-list">
-                    <% if (bottomPcl && bottomPcl.length > 0) { %>
-                        <% bottomPcl.forEach((p, i) => { %>
-                            <li class="ranking-item">
-                                <span class="rank-name"><%= i + 1 %>. <%= p.name || '-' %></span>
-                                <span class="rank-score" style="color: #ef4444; background: rgba(239,68,68,0.15);"><%= p.didata !== undefined ? p.didata : p.harian %> Responden</span>
-                            </li>
-                        <% }) %>
-                    <% } else { %>
-                        <li class="ranking-item"><span class="rank-name">Belum ada data</span></li>
-                    <% } %>
-                </ul>
+            <div class="flex items-center flex-shrink-0 bg-white px-2.5 py-1.5 rounded-xl shadow-lg border border-slate-300">
+                <img src="/images/logo_se.png" alt="Logo SE" class="h-9 sm:h-11 w-auto object-contain" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+        <!-- Top Banner -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-6 shadow-2xl border-l-4 border-l-orange-500 flex items-center justify-between gap-4 bg-gradient-to-r from-slate-900/90 via-slate-900/80 to-orange-950/30">
+                <h2 class="text-sm sm:text-lg font-extrabold text-white tracking-wide uppercase">Capaian Pendataan Lapangan</h2>
+                <div class="bg-black/90 px-5 py-3 rounded-2xl border-2 border-orange-500/60 shadow-[0_0_20px_rgba(249,115,22,0.4)] flex items-center space-x-3">
+                    <div class="text-right">
+                        <span class="block text-[9px] text-orange-400 uppercase tracking-widest font-black">Live Gauge</span>
+                        <span class="text-2xl sm:text-3xl font-black text-orange-400 tracking-tighter drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]"><%= persentaseKretek %>%</span>
+                    </div>
+                    <div class="w-3 h-8 bg-orange-500/20 rounded-full overflow-hidden flex flex-col justify-end border border-orange-400/80">
+                        <div class="w-full bg-orange-500 animate-pulse shadow-[0_0_10px_#f97316]" style="height: <%= Math.min(Math.max(parseFloat(persentaseKretek), 0), 100) %>%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 shadow-2xl border-l-4 border-l-red-500 flex items-center justify-between gap-4 bg-gradient-to-r from-slate-950 via-slate-900 to-red-950/40 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-red-500/10 to-transparent pointer-events-none"></div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                        <span class="text-[10px] font-black text-red-400 tracking-wider uppercase font-mono">Telemetry // Deadline</span>
+                    </div>
+                    <h2 class="text-sm sm:text-base font-extrabold text-white tracking-wide mt-1 uppercase">Target Selesai Lapangan</h2>
+                </div>
+                <div class="bg-black/95 px-5 py-3 rounded-xl border-2 border-red-500/80 shadow-[0_0_25px_rgba(239,68,68,0.5)] text-center relative">
+                    <div class="absolute -top-2.5 left-1/2 transform -translate-x-1/2 bg-red-600 text-black text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest">Race Mode</div>
+                    <div id="countdownTimer" class="text-base sm:text-lg font-black text-red-500 tracking-wider font-mono drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">00 Hari 00 Jam</div>
+                    <span class="text-[9px] text-slate-300 uppercase tracking-widest font-extrabold">Sisa Waktu</span>
+                </div>
             </div>
         </div>
 
-        <!-- Detail Wilayah & Petugas -->
-        <div class="section-grid">
-            <div class="card">
-                <h3>Wilayah Kecamatan</h3>
-                <select id="selectKec" onchange="updateDetail('kec')">
-                    <option value="">-- Pilih Kecamatan --</option>
-                    <% kecData.forEach((row, i) => { %>
-                        <option value="<%= i %>"><%= row[2] || row[1] || 'Kecamatan ' + (i+1) %></option>
-                    <% }) %>
-                </select>
-                <div id="detailKec" class="stat-box" style="display:none;"></div>
+        <!-- Rekapitulasi Wilayah Desa -->
+        <div class="glass-card rounded-2xl p-6 shadow-xl border-t-4 border-t-amber-500 flex flex-col space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-amber-400">Rekapitulasi Wilayah Desa</p>
+                    <h2 class="text-base font-extrabold text-white mt-0.5">Progress per Desa / Kalurahan</h2>
+                </div>
+                <span class="bg-amber-500/20 text-amber-300 text-xs font-bold px-3 py-1 rounded-full border border-amber-500/30">
+                    Total Desa: <%= parsedDesa.length %>
+                </span>
             </div>
 
-            <div class="card">
-                <h3>Wilayah Desa</h3>
-                <select id="selectDesa" onchange="updateDetail('desa')">
-                    <option value="">-- Pilih Desa --</option>
-                    <% desaData.forEach((row, i) => { %>
-                        <option value="<%= i %>"><%= row[2] || row[1] || 'Desa ' + (i+1) %></option>
-                    <% }) %>
-                </select>
-                <div id="detailDesa" class="stat-box" style="display:none;"></div>
-            </div>
-
-            <div class="card">
-                <h3>Petugas PML</h3>
-                <select id="selectPml" onchange="updateDetail('pml')">
-                    <option value="">-- Pilih PML --</option>
-                    <% pmlData.forEach((row, i) => { %>
-                        <option value="<%= i %>"><%= row[1] || 'PML ' + (i+1) %></option>
-                    <% }) %>
-                </select>
-                <div id="detailPml" class="stat-box" style="display:none;"></div>
-            </div>
-
-            <div class="card">
-                <h3>Petugas PCL</h3>
-                <select id="selectPcl" onchange="updateDetail('pcl')">
-                    <option value="">-- Pilih PCL --</option>
-                    <% pclData.forEach((row, i) => { %>
-                        <option value="<%= i %>"><%= row[1] || 'PCL ' + (i+1) %></option>
-                    <% }) %>
-                </select>
-                <div id="detailPcl" class="stat-box" style="display:none;"></div>
+            <div class="rounded-xl border border-slate-800 bg-slate-950/60 overflow-hidden shadow-inner">
+                <div class="overflow-x-auto max-h-[350px]">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900/90 text-slate-300 sticky top-0 border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3 font-bold uppercase tracking-wider">Nama Desa / Wilayah</th>
+                                <th class="px-4 py-3 font-bold uppercase tracking-wider text-right">Target</th>
+                                <th class="px-4 py-3 font-bold uppercase tracking-wider text-right">Didata</th>
+                                <th class="px-4 py-3 font-bold uppercase tracking-wider text-right">Capaian (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 text-slate-200">
+                            <% if (parsedDesa.length === 0) { %>
+                                <tr>
+                                    <td colspan="4" class="px-4 py-6 text-center text-slate-400 italic">Tidak ada data desa tersedia</td>
+                                </tr>
+                            <% } else { %>
+                                <% parsedDesa.forEach(desa => { %>
+                                    <tr class="hover:bg-slate-900/60 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-slate-200"><%= desa.name %></td>
+                                        <td class="px-4 py-3 text-right font-semibold text-slate-300"><%= desa.target.toLocaleString('id-ID') %></td>
+                                        <td class="px-4 py-3 text-right font-semibold text-orange-400"><%= desa.didata.toLocaleString('id-ID') %></td>
+                                        <td class="px-4 py-3 text-right font-bold text-emerald-400">
+                                            <%= desa.target > 0 ? ((desa.didata / desa.target) * 100).toFixed(1) + '%' : '0.0%' %>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
+        <!-- Section Petugas PML & PCL -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Petugas PML Card -->
+            <div class="glass-card rounded-2xl p-6 shadow-xl border-t-4 border-t-blue-500 flex flex-col space-y-4">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-blue-400">Petugas PML (<%= detailedPml.length %>)</p>
+                    <h2 class="text-base font-extrabold text-white mt-0.5">Pilih Nama untuk Rincian</h2>
+                </div>
+
+                <div>
+                    <select id="pmlSelect" class="w-full bg-slate-900/90 border border-slate-700 text-white text-sm font-semibold rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-inner">
+                        <option value="" selected>-- Pilih Petugas PML --</option>
+                        <% detailedPml.forEach((p, idx) => { %>
+                            <option value="<%= idx %>"><%= p.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div id="pmlPlaceholder" class="py-8 text-center text-xs text-slate-400 italic bg-slate-950/40 rounded-xl border border-slate-800/80">
+                    Silakan pilih nama PML untuk menampilkan rincian data
+                </div>
+
+                <div id="pmlContentContainer" class="space-y-3 hidden">
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 overflow-hidden shadow-inner">
+                        <div class="bg-slate-900/90 px-4 py-2.5 flex justify-center items-center border-b border-slate-800">
+                            <span class="text-xs text-orange-400 font-extrabold tracking-wide" id="pmlSelectedNameTitle">-</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-[350px]">
+                            <table class="w-full text-left text-xs">
+                                <tbody id="pmlDetailTableBody" class="divide-y divide-slate-800/60 text-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Petugas PCL Card -->
+            <div class="glass-card rounded-2xl p-6 shadow-xl border-t-4 border-t-emerald-500 flex flex-col space-y-4">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-emerald-400">Petugas PCL (<%= detailedPcl.length %>)</p>
+                    <h2 class="text-base font-extrabold text-white mt-0.5">Pilih Nama untuk Rincian</h2>
+                </div>
+
+                <div>
+                    <select id="pclSelect" class="w-full bg-slate-900/90 border border-slate-700 text-white text-sm font-semibold rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-inner">
+                        <option value="" selected>-- Pilih Petugas PCL --</option>
+                        <% detailedPcl.forEach((p, idx) => { %>
+                            <option value="<%= idx %>"><%= p.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div id="pclPlaceholder" class="py-8 text-center text-xs text-slate-400 italic bg-slate-950/40 rounded-xl border border-slate-800/80">
+                    Silakan pilih nama PCL untuk menampilkan rincian data
+                </div>
+
+                <!-- Konten Rincian & Dashboard Telemetry PCL -->
+                <div id="pclContentContainer" class="space-y-3 hidden">
+                    
+                    <!-- Dashboard Motor Balap Telemetry Box -->
+                    <div id="pclTelemetryBox" class="p-3.5 rounded-xl border-2 bg-black/90 flex items-center justify-between shadow-xl transition-all">
+                        <div>
+                            <span class="block text-[8px] font-mono-telemetry tracking-widest text-slate-400 uppercase">⚡ TELEMETRY // PCL SPEEDOMETER</span>
+                            <span class="text-xs font-bold text-white mt-0.5 block" id="pclGaulMessage">Memuat status...</span>
+                        </div>
+                        <div class="text-right pl-3">
+                            <span class="block text-[8px] font-mono-telemetry tracking-widest text-slate-400 uppercase">+Didata Harian</span>
+                            <span id="pclHarianValue" class="text-2xl font-black font-mono-telemetry animate-blink drop-shadow">0</span>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 overflow-hidden shadow-inner">
+                        <div class="bg-slate-900/90 px-4 py-2.5 flex justify-center items-center border-b border-slate-800">
+                            <span class="text-xs text-orange-400 font-extrabold tracking-wide" id="pclSelectedNameTitle">-</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-[300px]">
+                            <table class="w-full text-left text-xs">
+                                <tbody id="pclDetailTableBody" class="divide-y divide-slate-800/60 text-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-6 text-center text-xs text-orange-400/70 border-t border-orange-500/20 bg-slate-950/40">
+        Desain & Website by vanndawir • mentas siji mentas kabeh
+    </footer>
+
+    <!-- JavaScript Interaktif -->
     <script>
-        /* --- SCRIPT UNTUK MENUTUP SPLASH SCREEN SETELAH 2 DETIK --- */
         window.addEventListener('load', () => {
             setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                splash.style.visibility = 'hidden';
-            }, 2000);
+                const splash = document.getElementById('welcomeSplash');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => {
+                        splash.style.display = 'none';
+                    }, 700);
+                }
+            }, 1500);
         });
 
-        const dataStore = {
-            kec: { headers: <%- JSON.stringify(kecHeaders) %>, rows: <%- JSON.stringify(kecData) %> },
-            desa: { headers: <%- JSON.stringify(desaHeaders) %>, rows: <%- JSON.stringify(desaData) %>, harianMap: <%- JSON.stringify(desaHarianMap) %> },
-            pml: { headers: <%- JSON.stringify(pmlHeaders) %>, rows: <%- JSON.stringify(pmlData) %>, harianMap: <%- JSON.stringify(pmlHarianMap) %> },
-            pcl: { headers: <%- JSON.stringify(pclHeaders) %>, rows: <%- JSON.stringify(pclData) %>, harianMap: <%- JSON.stringify(pclHarianMap) %> }
-        };
+        const targetDate = new Date('2026-08-17T00:00:00').getTime();
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            const timerEl = document.getElementById('countdownTimer');
+            if (!timerEl) return;
 
-        function getValueByKeywords(headers, row, keywords) {
-            for (let kw of keywords) {
-                for (let i = 0; i < headers.length; i++) {
-                    const h = headers[i] ? String(headers[i]).toLowerCase() : '';
-                    if (h.includes(kw)) {
-                        if (kw === 'didata' && h.includes('%')) continue;
-                        if (row[i] !== undefined && row[i] !== '' && row[i] !== null) return row[i];
-                    }
-                }
-            }
-            return '0';
-        }
-
-        function getPercentValue(headers, row) {
-            for (let i = 0; i < headers.length; i++) {
-                const h = headers[i] ? String(headers[i]).toLowerCase() : '';
-                if ((h.includes('%') || h.includes('persen')) && !h.includes('draft')) {
-                    if (row[i] !== undefined && row[i] !== '') {
-                        let val = String(row[i]).trim();
-                        if (!val.includes('%') && !isNaN(val) && val !== '') {
-                            let num = parseFloat(val);
-                            if (num <= 5) {
-                                return (num * 100).toFixed(2) + '%';
-                            }
-                        }
-                        return val;
-                    }
-                }
-            }
-            return '0%';
-        }
-
-        function updateDetail(type) {
-            const select = document.getElementById('select' + type.charAt(0).toUpperCase() + type.slice(1));
-            const box = document.getElementById('detail' + type.charAt(0).toUpperCase() + type.slice(1));
-            const idx = select.value;
-
-            if (idx === "") {
-                box.style.display = 'none';
+            if (distance < 0) {
+                timerEl.innerText = "Waktu Tiba!";
                 return;
             }
 
-            box.style.display = 'block';
-            const store = dataStore[type];
-            const row = store.rows[idx];
-            const headers = store.headers;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            timerEl.innerText = `${days} Hari ${hours} Jam ${minutes} Menit`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        const detailedPmlData = <%- JSON.stringify(detailedPml) %>;
+        const detailedPclData = <%- JSON.stringify(detailedPcl) %>;
+
+        // PML Handler
+        const pmlSelect = document.getElementById('pmlSelect');
+        const pmlSelectedNameTitle = document.getElementById('pmlSelectedNameTitle');
+        const pmlTableBody = document.getElementById('pmlDetailTableBody');
+        const pmlPlaceholder = document.getElementById('pmlPlaceholder');
+        const pmlContentContainer = document.getElementById('pmlContentContainer');
+
+        pmlSelect.addEventListener('change', () => {
+            const val = pmlSelect.value;
+            if (val === "") {
+                pmlPlaceholder.classList.remove('hidden');
+                pmlContentContainer.classList.add('hidden');
+                return;
+            }
+            const item = detailedPmlData[parseInt(val)];
+            if (!item) return;
+
+            pmlPlaceholder.classList.add('hidden');
+            pmlContentContainer.classList.remove('hidden');
+            pmlSelectedNameTitle.innerText = item.name;
 
             let html = '';
+            item.rawCells.forEach(cell => {
+                html += `<tr class="hover:bg-slate-900/60 transition-colors">
+                    <td class="px-4 py-2.5 font-medium text-slate-300 w-1/2">${cell.header}</td>
+                    <td class="px-4 py-2.5 text-right font-semibold text-white w-1/2">${cell.value}</td>
+                </tr>`;
+            });
+            pmlTableBody.innerHTML = html;
+        });
 
-            if (type === 'kec') {
-                const persen = getPercentValue(headers, row);
-                const didata = getValueByKeywords(headers, row, ['responden didata', 'didata']);
-                const target = getValueByKeywords(headers, row, ['target', 'prelist']);
-                html += `
-                    <div class="stat-row"><span class="stat-label">Target Prelist:</span> <span class="stat-value">${target}</span></div>
-                    <div class="stat-row"><span class="stat-label">Responden Didata:</span> <span class="stat-value">${didata}</span></div>
-                    <div class="stat-row">
-                        <span class="stat-label">% Didata</span>
-                        <span class="stat-value" style="color: var(--primary-orange); font-size: 16px;">${persen}</span>
-                    </div>
-                `;
-            } else if (type === 'desa') {
-                const name = row[2] || row[1] || '';
-                const didata = getValueByKeywords(headers, row, ['responden didata', 'didata']);
-                const persen = getPercentValue(headers, row);
-                const bkuPrelist = getValueByKeywords(headers, row, ['bku prelist', 'prelist']);
-                const bkuDitemukan = getValueByKeywords(headers, row, ['bku ditemukan', 'ditemukan']);
-                const bkuBaru = getValueByKeywords(headers, row, ['bku baru', 'baru']);
-                const totalBku = getValueByKeywords(headers, row, ['total bku']);
-                const kelDitemukan = getValueByKeywords(headers, row, ['keluarga ditemukan']);
-                const kelBaru = getValueByKeywords(headers, row, ['keluarga baru']);
-                const kelTutup = getValueByKeywords(headers, row, ['keluarga tutup', 'tutup']);
-                const totalUsaha = getValueByKeywords(headers, row, ['total usaha keluarga', 'usaha keluarga']);
-                const harian = store.harianMap && store.harianMap[name] !== undefined ? store.harianMap[name] : 0;
+        // PCL Handler & Dashboard Telemetry
+        const pclSelect = document.getElementById('pclSelect');
+        const pclSelectedNameTitle = document.getElementById('pclSelectedNameTitle');
+        const pclTableBody = document.getElementById('pclDetailTableBody');
+        const pclPlaceholder = document.getElementById('pclPlaceholder');
+        const pclContentContainer = document.getElementById('pclContentContainer');
+        const pclTelemetryBox = document.getElementById('pclTelemetryBox');
+        const pclHarianValue = document.getElementById('pclHarianValue');
+        const pclGaulMessage = document.getElementById('pclGaulMessage');
 
-                html += `
-                    <div class="stat-row"><span class="stat-label">Responden Didata:</span> <span class="stat-value">${didata}</span></div>
-                    <div class="stat-row"><span class="stat-label">+Didata (Harian):</span> <span class="stat-value" style="color: var(--primary-orange);">+${harian}</span></div>
-                    <div class="stat-row"><span class="stat-label">% Didata:</span> <span class="stat-value">${persen}</span></div>
-                    <div class="stat-row"><span class="stat-label">BKU Prelist:</span> <span class="stat-value">${bkuPrelist}</span></div>
-                    <div class="stat-row"><span class="stat-label">BKU Ditemukan:</span> <span class="stat-value">${bkuDitemukan}</span></div>
-                    <div class="stat-row"><span class="stat-label">BKU Baru:</span> <span class="stat-value">${bkuBaru}</span></div>
-                    <div class="stat-row"><span class="stat-label">Total BKU:</span> <span class="stat-value">${totalBku}</span></div>
-                    <div class="stat-row"><span class="stat-label">Keluarga Ditemukan:</span> <span class="stat-value">${kelDitemukan}</span></div>
-                    <div class="stat-row"><span class="stat-label">Keluarga Baru:</span> <span class="stat-value">${kelBaru}</span></div>
-                    <div class="stat-row"><span class="stat-label">Keluarga Tutup:</span> <span class="stat-value">${kelTutup}</span></div>
-                    <div class="stat-row"><span class="stat-label">Total Usaha Keluarga:</span> <span class="stat-value">${totalUsaha}</span></div>
-                `;
-            } else if (type === 'pcl' || type === 'pml') {
-                const name = row[1] ? String(row[1]).trim() : '';
-                const subSls = row[4] !== undefined && row[4] !== '' ? row[4] : getValueByKeywords(headers, row, ['sub-sls', 'sls']);
-                const didata = parseInt(getValueByKeywords(headers, row, ['responden didata', 'didata'])) || 0;
-                const targetPrelist = parseInt(getValueByKeywords(headers, row, ['target prelist', 'target'])) || 0;
-                const totalBku = parseInt(getValueByKeywords(headers, row, ['total bku'])) || 0;
-                const totalUsaha = parseInt(getValueByKeywords(headers, row, ['total usaha keluarga', 'usaha keluarga'])) || 0;
-                
-                const belumDidata = Math.max(0, targetPrelist - didata);
-                const harian = store.harianMap && store.harianMap[name] !== undefined ? store.harianMap[name] : 0;
-                const badgeColor = harian >= 10 ? '#10b981' : '#ef4444';
+        pclSelect.addEventListener('change', () => {
+            const val = pclSelect.value;
+            if (val === "") {
+                pclPlaceholder.classList.remove('hidden');
+                pclContentContainer.classList.add('hidden');
+                return;
+            }
+            const item = detailedPclData[parseInt(val)];
+            if (!item) return;
 
-                html += `
-                    <div class="stat-row"><span class="stat-label">Sub-SLS Diampu:</span> <span class="stat-value">${subSls}</span></div>
-                    <div class="stat-row"><span class="stat-label">Progress Harian (+Didata):</span> <span class="badge-progres" style="background-color: ${badgeColor};">+${harian} Responden</span></div>
-                    <div class="stat-row"><span class="stat-label">Target Prelist:</span> <span class="stat-value">${targetPrelist}</span></div>
-                    <div class="stat-row"><span class="stat-label">Responden Didata:</span> <span class="stat-value">${didata}</span></div>
-                    <div class="stat-row"><span class="stat-label">Belum Didata:</span> <span class="stat-value" style="color: #ef4444; font-weight: bold;">${belumDidata}</span></div>
-                    <div class="stat-row"><span class="stat-label">Total BKU:</span> <span class="stat-value">${totalBku}</span></div>
-                    <div class="stat-row"><span class="stat-label">Total Usaha Keluarga:</span> <span class="stat-value">${totalUsaha}</span></div>
-                `;
+            pclPlaceholder.classList.add('hidden');
+            pclContentContainer.classList.remove('hidden');
+            pclSelectedNameTitle.innerText = item.name;
+
+            // Set Dashboard Motor Balap Telemetry Data
+            pclHarianValue.innerText = "+" + item.harian;
+
+            if (item.harian >= 10) {
+                // Warna Hijau (Top Speed / Gaspol)
+                pclTelemetryBox.className = "p-3.5 rounded-xl border-2 border-emerald-500 bg-black/95 flex items-center justify-between shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all";
+                pclHarianValue.className = "text-2xl font-black font-mono-telemetry animate-blink text-emerald-400 drop-shadow-[0_0_10px_#10b981]";
+                pclGaulMessage.innerHTML = "🚀 <span class='text-emerald-400 font-extrabold'>TOP SPEED!</span> Nyala abangkuh, ngebut parah RPM merah! 🔥";
+            } else {
+                // Warna Merah (Gigi 1 / Perlu Tarik Gas)
+                pclTelemetryBox.className = "p-3.5 rounded-xl border-2 border-red-500 bg-black/95 flex items-center justify-between shadow-[0_0_20px_rgba(239,68,68,0.35)] transition-all";
+                pclHarianValue.className = "text-2xl font-black font-mono-telemetry animate-blink text-red-400 drop-shadow-[0_0_10px_#ef4444]";
+                pclGaulMessage.innerHTML = "🐢 <span class='text-red-400 font-extrabold'>MASIH GIGI 1!</span> Tarik kopling, gaspol lagi bosku biar ga ketinggalan!";
             }
 
-            box.innerHTML = html;
-        }
+            let html = '';
+            item.rawCells.forEach(cell => {
+                html += `<tr class="hover:bg-slate-900/60 transition-colors">
+                    <td class="px-4 py-2.5 font-medium text-slate-300 w-1/2">${cell.header}</td>
+                    <td class="px-4 py-2.5 text-right font-semibold text-white w-1/2">${cell.value}</td>
+                </tr>`;
+            });
+            pclTableBody.innerHTML = html;
+        });
     </script>
-    <div style="text-align: center; padding: 30px 0 20px 0; color: #888; font-size: 13px;">
-        Desain &amp; Website by <b>vanndawir</b>
-    </div>
 </body>
 </html>
