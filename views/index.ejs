@@ -66,16 +66,14 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6">
 
-        <!-- Top Banner (Nuansa Merah Putih Bendera Indonesia) -->
+        <!-- Top Banner -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div class="rounded-2xl shadow-2xl overflow-hidden border-2 border-red-500/80 flex flex-col sm:flex-row items-center justify-between relative">
-                <!-- Background Merah Putih (Bendera Indonesia Style) -->
                 <div class="absolute inset-0 flex flex-col w-full h-full pointer-events-none z-0">
                     <div class="w-full h-1/2 bg-red-600"></div>
                     <div class="w-full h-1/2 bg-white"></div>
                 </div>
 
-                <!-- Konten Kiri (Teks & Tahun) -->
                 <div class="relative z-10 p-5 sm:p-6 flex flex-col justify-center w-full sm:w-auto">
                     <div class="flex items-center space-x-2 mb-1.5">
                         <span class="inline-block w-2.5 h-2.5 rounded-full bg-white animate-ping shadow-md"></span>
@@ -84,7 +82,6 @@
                     <h2 class="text-sm sm:text-base font-black text-slate-900 tracking-wide uppercase bg-white/90 px-3 py-1.5 rounded-xl border border-red-300 shadow-md inline-block w-fit">Kemerdekaan Indonesia</h2>
                 </div>
 
-                <!-- Konten Kanan (Countdown Timer Box) -->
                 <div class="relative z-10 p-5 sm:p-6 flex items-center justify-end w-full sm:w-auto">
                     <div class="bg-black/95 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl border-2 border-red-500 shadow-[0_0_25px_rgba(220,38,38,0.5)] text-center relative">
                         <div class="absolute -top-2.5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest shadow">HUT RI 81</div>
@@ -286,30 +283,33 @@
                         
                         <div class="relative z-10 flex flex-col justify-center">
                             <div class="flex items-center space-x-1 sm:space-x-1.5 mb-1 sm:mb-2">
-                                <div class="w-3 sm:w-4 h-1.5 bg-amber-500 skew-x-[15deg] shadow-[0_0_6px_#fbbf24]"></div>
-                                <div class="w-3 sm:w-4 h-1.5 bg-amber-500 skew-x-[15deg] shadow-[0_0_6px_#fbbf24]"></div>
-                                <span class="ml-1 text-[8px] sm:text-[10px] font-mono-telemetry font-black text-amber-300 tracking-widest uppercase">% (DIDATA + DRAFT)</span>
+                                <div class="w-3 sm:w-4 h-1.5 bg-green-500 skew-x-[15deg] shadow-[0_0_6px_#22c55e]"></div>
+                                <div class="w-3 sm:w-4 h-1.5 bg-green-500 skew-x-[15deg] shadow-[0_0_6px_#22c55e]"></div>
+                                <div class="w-3 sm:w-4 h-1.5 bg-green-500 skew-x-[15deg] shadow-[0_0_6px_#22c55e]"></div>
+                                <div class="w-3 sm:w-4 h-1.5 bg-yellow-400 skew-x-[15deg] shadow-[0_0_6px_#facc15]"></div>
+                                <div class="w-3 sm:w-4 h-1.5 bg-yellow-400 skew-x-[15deg] shadow-[0_0_6px_#facc15]"></div>
+                                <div class="w-3 sm:w-4 h-1.5 bg-red-600 skew-x-[15deg] animate-pulse shadow-[0_0_10px_#dc2626]"></div>
+                                <span class="ml-2 text-[8px] sm:text-[10px] font-mono-telemetry font-black text-slate-300 tracking-widest uppercase">RSP. DIDATA</span>
                             </div>
                             
                             <div class="flex items-baseline">
-                                <h3 id="pclPercentageValue" class="text-4xl sm:text-5xl font-black text-amber-300 italic tracking-tighter drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] font-mono-telemetry" style="line-height: 0.85;">0%</h3>
+                                <h3 id="pclSelectedNameTitle" class="text-5xl sm:text-6xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] font-mono-telemetry" style="line-height: 0.85;">0</h3>
                             </div>
                         </div>
 
                         <div class="flex items-center space-x-2 relative z-10">
                             <div class="bg-black/90 px-3 py-2 rounded-xl border border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.3)] text-center flex items-center space-x-2">
                                 <div class="text-right">
-                                    <span class="block text-[8px] font-mono-telemetry tracking-widest text-amber-400 uppercase font-black">Bar</span>
+                                    <span class="block text-[8px] font-mono-telemetry tracking-widest text-amber-400 uppercase font-black">Progress</span>
+                                    <span id="pclPercentageValue" class="text-xs sm:text-sm font-black font-mono-telemetry text-amber-300">0%</span>
                                 </div>
                                 <div class="w-2.5 h-6 bg-amber-500/20 rounded-full overflow-hidden flex flex-col justify-end border border-amber-400/60">
                                     <div id="pclPercentageBar" class="w-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" style="height: 0%;"></div>
                                 </div>
                             </div>
-                            <div id="pclHarianBox" class="bg-black/90 px-3 py-2 rounded-xl border shadow-md text-center flex items-center border-slate-700">
-                                <div class="text-right">
-                                    <span class="block text-[8px] font-mono-telemetry tracking-widest text-slate-300 uppercase font-black">Prog. Harian</span>
-                                    <span id="pclHarianValue" class="text-xs sm:text-sm font-black font-mono-telemetry text-slate-100">0</span>
-                                </div>
+                            <div class="bg-black/90 px-3.5 py-2 rounded-xl border border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.3)] text-center">
+                                <span class="block text-[8px] font-mono-telemetry tracking-widest text-cyan-400 uppercase font-black">+Didata</span>
+                                <span id="pclProgHarianValue" class="text-base sm:text-lg font-black font-mono-telemetry text-cyan-300">0</span>
                             </div>
                             <div class="bg-black/90 px-3.5 py-1.5 rounded-xl border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] text-right hidden sm:block">
                                 <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Sisa Target</span>
@@ -350,7 +350,6 @@
             }, 1200);
         });
 
-        // Waktu Hitung Mundur Detik-detik Proklamasi (17 Agustus 2026 Jam 10:00:00)
         const targetDate = new Date('2026-08-17T10:00:00').getTime();
         function updateCountdown() {
             const now = new Date().getTime();
@@ -374,6 +373,28 @@
         const detailedPmlData = <%- JSON.stringify(typeof detailedPml !== 'undefined' && detailedPml ? detailedPml : []) %>;
         const detailedPclData = <%- JSON.stringify(typeof detailedPcl !== 'undefined' && detailedPcl ? detailedPcl : []) %>;
 
+        function parseNum(val) {
+            if (typeof val === 'number') {
+                val = String(val);
+            }
+            if (!val) return 0;
+            let str = String(val).trim();
+            if (str.includes('.') && str.includes(',')) {
+                str = str.replace(/\./g, '').replace(',', '.');
+            } else if (str.indexOf('.') !== -1) {
+                if (/\.\d{3}$/.test(str) || /^\d{1,3}\.\d{3}$/.test(str) || /^\d{1,3}\.\d{3}\.\d{3}$/.test(str)) {
+                    str = str.replace(/\./g, '');
+                }
+            } else if (str.indexOf(',') !== -1) {
+                if (/,\d{3}$/.test(str)) {
+                    str = str.replace(/,/g, '');
+                } else {
+                    str = str.replace(',', '.');
+                }
+            }
+            return parseFloat(str) || 0;
+        }
+
         function getFilteredCells(rawCells) {
             if (!rawCells || !Array.isArray(rawCells)) return [];
             return rawCells.slice(-8);
@@ -389,9 +410,6 @@
             });
         }
 
-        // ==========================================
-        // Logika Petugas PML
-        // ==========================================
         const pmlSelect = document.getElementById('pmlSelect');
         const pmlTitle = document.getElementById('pmlSelectedNameTitle');
         const pmlSisa = document.getElementById('pmlSisaTargetValue');
@@ -402,14 +420,11 @@
         const pmlPlace = document.getElementById('pmlPlaceholder');
         const pmlCont = document.getElementById('pmlContentContainer');
 
-        // ==========================================
-        // Logika Petugas PCL
-        // ==========================================
         const pclSelect = document.getElementById('pclSelect');
+        const pclTitle = document.getElementById('pclSelectedNameTitle');
         const pclPctVal = document.getElementById('pclPercentageValue');
         const pclPctBar = document.getElementById('pclPercentageBar');
-        const pclHarianVal = document.getElementById('pclHarianValue');
-        const pclHarianBox = document.getElementById('pclHarianBox');
+        const pclProgHarianVal = document.getElementById('pclProgHarianValue');
         const pclSisa = document.getElementById('pclSisaTargetValue');
         const pclSisaMob = document.getElementById('pclSisaTargetValueMobile');
         const pclGrid = document.getElementById('pclCockpitGrid');
@@ -425,9 +440,8 @@
                     return;
                 }
 
-                // Otomatis tutup/reset tampilan PCL jika PML dipilih
                 if (pclSelect) pclSelect.value = "";
-                if (pclPlace) pclPlace.classList.remove('hidden');
+                if (pclPlace) pclPlace.classList.add('hidden');
                 if (pclCont) pclCont.classList.add('hidden');
 
                 const item = detailedPmlData[parseInt(val, 10)];
@@ -437,60 +451,78 @@
                 pmlCont.classList.remove('hidden');
 
                 let gridHtml = '';
-                if (item.rawCells && Array.isArray(item.rawCells)) {
-                    let cells = getPmlFilteredCells(item.rawCells);
+                let didataVal = 0;
+                let targetVal = 0;
 
+                if (item.rawCells && Array.isArray(item.rawCells)) {
+                    item.rawCells.forEach(cell => {
+                        const hLower = (cell.header || '').toLowerCase();
+                        const cValNum = parseNum(cell.value);
+
+                        if ((hLower.includes('total usaha keluarga') || hLower.includes('usaha keluarga')) && !hLower.includes('target') && !hLower.includes('prelist')) {
+                            if (cValNum > didataVal) didataVal = cValNum;
+                        } else if (didataVal === 0 && (hLower.includes('didata') || hLower.includes('realisasi')) && !hLower.includes('target') && !hLower.includes('prelist')) {
+                            didataVal = cValNum;
+                        }
+
+                        if ((hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) && !hLower.includes('prelist') && !hLower.includes('pre-list')) {
+                            targetVal = cValNum;
+                        }
+                    });
+
+                    if (didataVal === 0) {
+                        item.rawCells.forEach(cell => {
+                            const hLower = (cell.header || '').toLowerCase();
+                            const cValNum = parseNum(cell.value);
+                            if (!hLower.includes('target') && !hLower.includes('prelist') && cValNum > didataVal) {
+                                didataVal = cValNum;
+                            }
+                        });
+                    }
+
+                    if (targetVal === 0) {
+                        item.rawCells.forEach(cell => {
+                            const hLower = (cell.header || '').toLowerCase();
+                            const cValNum = parseNum(cell.value);
+                            if (hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) {
+                                targetVal = cValNum;
+                            }
+                        });
+                    }
+
+                    let cells = getPmlFilteredCells(item.rawCells);
                     cells.sort((a, b) => {
                         const ha = (a.header || '').toLowerCase();
                         const hb = (b.header || '').toLowerCase();
-                        const isProgressA = ha.includes('progress');
-                        const isProgressB = hb.includes('progress');
-                        if (isProgressA) return -1;
-                        if (isProgressB) return 1;
-                        return 0;
+                        if (ha.includes('target') && !ha.includes('prelist')) return -1;
+                        if (hb.includes('target') && !hb.includes('prelist')) return 1;
+                        if (ha.includes('didata') || ha.includes('usaha')) return -1;
+                        if (hb.includes('didata') || hb.includes('usaha')) return 1;
+                        return ha.localeCompare(hb);
                     });
 
-                    cells.forEach((cell) => {
+                    cells.forEach(cell => {
+                        const header = cell.header || 'Label';
+                        const cVal = cell.value || 0;
                         gridHtml += `
-                        <div class="bg-black/80 rounded-xl p-3 border border-amber-500/30 flex flex-col justify-between shadow-[inset_0_0_10px_rgba(245,158,11,0.15)]">
-                            <span class="text-[9px] font-mono-telemetry text-slate-400 uppercase tracking-wider block border-b border-slate-800/80 pb-1">${cell.header}</span>
-                            <span class="text-sm sm:text-base font-black text-amber-300 font-mono-telemetry mt-1.5 block tracking-tight">${cell.value}</span>
-                        </div>`;
+                            <div class="bg-black/90 p-3 rounded-xl border border-slate-800 flex justify-between items-center shadow">
+                                <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${header}</span>
+                                <span class="text-xs sm:text-sm font-black font-mono-telemetry text-white">${typeof cVal === 'number' ? cVal.toLocaleString('id-ID') : cVal}</span>
+                            </div>
+                        `;
                     });
                 }
-                pmlGrid.innerHTML = gridHtml;
 
-                let target = 0;
-                let didata = 0;
-                let xlsPct = '';
-                if (item.rawCells && Array.isArray(item.rawCells)) {
-                    item.rawCells.forEach(cell => {
-                        const h = (cell.header || '').toLowerCase();
-                        const vNum = parseInt(String(cell.value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                        if (h.includes('target') || h.includes('prelist')) {
-                            if (target === 0) target = vNum;
-                        } else if (h.includes('responden didata') || (h.includes('didata') && !h.includes('draft') && !h.includes('%'))) {
-                            if (didata === 0) didata = vNum;
-                        } else if (h.includes('persentase') || h.includes('progress') || (h.includes('%') && !h.includes('draft'))) {
-                            if (!xlsPct && cell.value !== undefined) xlsPct = cell.value;
-                        }
-                    });
-                    if (target === 0 && item.rawCells.length > 1) {
-                        target = parseInt(String(item.rawCells[1].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-                    if (didata === 0 && item.rawCells.length > 2) {
-                        didata = parseInt(String(item.rawCells[2].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-                }
-                
-                pmlTitle.innerText = didata.toLocaleString('id-ID');
-                const sisa = Math.max(target - didata, 0);
-                pmlSisa.innerText = sisa.toLocaleString('id-ID');
-                pmlSisaMob.innerText = sisa.toLocaleString('id-ID');
+                pmlTitle.innerText = didataVal.toLocaleString('id-ID');
+                const pmlPct = targetVal > 0 ? (didataVal / targetVal) * 100 : 0;
+                pmlPctVal.innerText = pmlPct.toFixed(1) + '%';
+                pmlPctBar.style.height = Math.min(Math.max(pmlPct, 0), 100) + '%';
 
-                const pct = target > 0 ? ((didata / target) * 100) : 0;
-                pmlPctVal.innerText = (xlsPct && xlsPct !== '') ? xlsPct : pct.toFixed(1) + '%';
-                pmlPctBar.style.height = Math.min(Math.max(pct, 0), 100) + '%';
+                const pmlSisaTarget = Math.max(targetVal - didataVal, 0);
+                pmlSisa.innerText = pmlSisaTarget.toLocaleString('id-ID');
+                if (pmlSisaMob) pmlSisaMob.innerText = pmlSisaTarget.toLocaleString('id-ID');
+
+                pmlGrid.innerHTML = gridHtml || '<div class="col-span-full text-center text-xs text-slate-500 italic">Tidak ada rincian data</div>';
             });
         }
 
@@ -503,9 +535,8 @@
                     return;
                 }
 
-                // Otomatis tutup/reset tampilan PML jika PCL dipilih
                 if (pmlSelect) pmlSelect.value = "";
-                if (pmlPlace) pmlPlace.classList.remove('hidden');
+                if (pmlPlace) pmlPlace.classList.add('hidden');
                 if (pmlCont) pmlCont.classList.add('hidden');
 
                 const item = detailedPclData[parseInt(val, 10)];
@@ -515,78 +546,83 @@
                 pclCont.classList.remove('hidden');
 
                 let gridHtml = '';
-                if (item.rawCells && Array.isArray(item.rawCells)) {
-                    let cells = getFilteredCells(item.rawCells);
+                let didataVal = 0;
+                let targetVal = 0;
+                let progHarianVal = 0;
 
+                if (item.rawCells && Array.isArray(item.rawCells)) {
+                    item.rawCells.forEach(cell => {
+                        const hLower = (cell.header || '').toLowerCase();
+                        const cValNum = parseNum(cell.value);
+
+                        if (hLower.includes('+didata') || hLower.includes('+ didata')) {
+                            progHarianVal = cValNum;
+                        } else if ((hLower.includes('total usaha keluarga') || hLower.includes('usaha keluarga')) && !hLower.includes('target') && !hLower.includes('prelist')) {
+                            if (cValNum > didataVal) didataVal = cValNum;
+                        } else if (didataVal === 0 && (hLower.includes('didata') || hLower.includes('realisasi')) && !hLower.includes('target') && !hLower.includes('prelist') && !hLower.includes('draft')) {
+                            didataVal = cValNum;
+                        }
+
+                        if ((hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) && !hLower.includes('prelist') && !hLower.includes('pre-list')) {
+                            targetVal = cValNum;
+                        }
+                    });
+
+                    if (didataVal === 0) {
+                        item.rawCells.forEach(cell => {
+                            const hLower = (cell.header || '').toLowerCase();
+                            const cValNum = parseNum(cell.value);
+                            if (!hLower.includes('target') && !hLower.includes('prelist') && !hLower.includes('draft') && !hLower.includes('+didata') && cValNum > didataVal) {
+                                didataVal = cValNum;
+                            }
+                        });
+                    }
+
+                    if (targetVal === 0) {
+                        item.rawCells.forEach(cell => {
+                            const hLower = (cell.header || '').toLowerCase();
+                            const cValNum = parseNum(cell.value);
+                            if (hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) {
+                                targetVal = cValNum;
+                            }
+                        });
+                    }
+
+                    let cells = getPmlFilteredCells(item.rawCells);
                     cells.sort((a, b) => {
                         const ha = (a.header || '').toLowerCase();
                         const hb = (b.header || '').toLowerCase();
-                        const isProgressA = ha.includes('progress');
-                        const isProgressB = hb.includes('progress');
-                        if (isProgressA) return -1;
-                        if (isProgressB) return 1;
-                        return 0;
+                        if (ha.includes('target') && !ha.includes('prelist')) return -1;
+                        if (hb.includes('target') && !hb.includes('prelist')) return 1;
+                        if (ha.includes('didata') || ha.includes('usaha')) return -1;
+                        if (hb.includes('didata') || hb.includes('usaha')) return 1;
+                        return ha.localeCompare(hb);
                     });
 
-                    cells.forEach((cell) => {
+                    cells.forEach(cell => {
+                        const header = cell.header || 'Label';
+                        const cVal = cell.value || 0;
                         gridHtml += `
-                        <div class="bg-black/80 rounded-xl p-3 border border-amber-500/30 flex flex-col justify-between shadow-[inset_0_0_10px_rgba(245,158,11,0.15)]">
-                            <span class="text-[9px] font-mono-telemetry text-slate-400 uppercase tracking-wider block border-b border-slate-800/80 pb-1">${cell.header}</span>
-                            <span class="text-sm sm:text-base font-black text-amber-300 font-mono-telemetry mt-1.5 block tracking-tight">${cell.value}</span>
-                        </div>`;
+                            <div class="bg-black/90 p-3 rounded-xl border border-slate-800 flex justify-between items-center shadow">
+                                <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${header}</span>
+                                <span class="text-xs sm:text-sm font-black font-mono-telemetry text-white">${typeof cVal === 'number' ? cVal.toLocaleString('id-ID') : cVal}</span>
+                            </div>
+                        `;
                     });
                 }
-                pclGrid.innerHTML = gridHtml;
 
-                let target = 0;
-                let didata = 0;
-                let harian = 0;
-                let xlsPct = '';
-                
-                if (item.rawCells && Array.isArray(item.rawCells)) {
-                    if (item.rawCells.length > 7 && item.rawCells[7]) {
-                        harian = parseInt(String(item.rawCells[7].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
+                pclTitle.innerText = didataVal.toLocaleString('id-ID');
+                const pclPct = targetVal > 0 ? (didataVal / targetVal) * 100 : 0;
+                pclPctVal.innerText = pclPct.toFixed(1) + '%';
+                pclPctBar.style.height = Math.min(Math.max(pclPct, 0), 100) + '%';
 
-                    item.rawCells.forEach(cell => {
-                        const h = (cell.header || '').toLowerCase();
-                        const vNum = parseInt(String(cell.value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                        if (h.includes('target') || h.includes('prelist')) {
-                            if (target === 0) target = vNum;
-                        } else if (h.includes('responden didata') || (h.includes('didata') && !h.includes('%'))) {
-                            if (didata === 0) didata = vNum;
-                        } else if (h.includes('persentase') || h.includes('progress') || h.includes('%')) {
-                            if (!xlsPct && cell.value !== undefined) xlsPct = cell.value;
-                        }
-                    });
-                    if (target === 0 && item.rawCells.length > 1) {
-                        target = parseInt(String(item.rawCells[1].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-                    if (didata === 0 && item.rawCells.length > 2) {
-                        didata = parseInt(String(item.rawCells[2].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-                }
+                if (pclProgHarianVal) pclProgHarianVal.innerText = progHarianVal.toLocaleString('id-ID');
 
-                const sisa = Math.max(target - didata, 0);
-                pclSisa.innerText = sisa.toLocaleString('id-ID');
-                pclSisaMob.innerText = sisa.toLocaleString('id-ID');
-                
-                if (pclHarianVal && pclHarianBox) {
-                    pclHarianVal.innerText = harian.toLocaleString('id-ID');
-                    pclHarianBox.classList.remove('border-green-500/50', 'shadow-[0_0_12px_rgba(34,197,94,0.3)]', 'border-rose-500/50', 'shadow-[0_0_12px_rgba(244,63,94,0.3)]');
-                    pclHarianVal.classList.remove('text-green-400', 'text-rose-400');
-                    if (harian >= 10) {
-                        pclHarianBox.classList.add('border-green-500/50', 'shadow-[0_0_12px_rgba(34,197,94,0.3)]');
-                        pclHarianVal.classList.add('text-green-400');
-                    } else {
-                        pclHarianBox.classList.add('border-rose-500/50', 'shadow-[0_0_12px_rgba(244,63,94,0.3)]');
-                        pclHarianVal.classList.add('text-rose-400');
-                    }
-                }
+                const pclSisaTarget = Math.max(targetVal - didataVal, 0);
+                pclSisa.innerText = pclSisaTarget.toLocaleString('id-ID');
+                if (pclSisaMob) pclSisaMob.innerText = pclSisaTarget.toLocaleString('id-ID');
 
-                const pct = target > 0 ? ((didata / target) * 100) : 0;
-                pclPctVal.innerText = (xlsPct && xlsPct !== '') ? xlsPct : pct.toFixed(1) + '%';
-                pclPctBar.style.height = Math.min(Math.max(pct, 0), 100) + '%';
+                pclGrid.innerHTML = gridHtml || '<div class="col-span-full text-center text-xs text-slate-500 italic">Tidak ada rincian data</div>';
             });
         }
     </script>
