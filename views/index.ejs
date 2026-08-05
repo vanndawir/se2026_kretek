@@ -425,7 +425,6 @@
                     return;
                 }
 
-                // Otomatis tutup/reset tampilan PCL jika PML dipilih
                 if (pclSelect) pclSelect.value = "";
                 if (pclPlace) pclPlace.classList.remove('hidden');
                 if (pclCont) pclCont.classList.add('hidden');
@@ -436,61 +435,25 @@
                 pmlPlace.classList.add('hidden');
                 pmlCont.classList.remove('hidden');
 
+                pmlTitle.innerText = (item.didata || 0).toLocaleString('id-ID');
+                pmlPctVal.innerText = (item.percentage || 0).toFixed(1) + '%';
+                pmlPctBar.style.height = Math.min(Math.max(item.percentage || 0, 0), 100) + '%';
+                pmlSisa.innerText = (item.sisaTarget || 0).toLocaleString('id-ID');
+                pmlSisaMob.innerText = (item.sisaTarget || 0).toLocaleString('id-ID');
+
                 let gridHtml = '';
                 if (item.rawCells && Array.isArray(item.rawCells)) {
                     let cells = getPmlFilteredCells(item.rawCells);
-
-                    cells.sort((a, b) => {
-                        const ha = (a.header || '').toLowerCase();
-                        const hb = (b.header || '').toLowerCase();
-                        const isProgressA = ha.includes('progress');
-                        const isProgressB = hb.includes('progress');
-                        if (isProgressA) return -1;
-                        if (isProgressB) return 1;
-                        return 0;
-                    });
-
-                    cells.forEach((cell) => {
+                    cells.forEach(cell => {
                         gridHtml += `
-                        <div class="bg-black/80 rounded-xl p-3 border border-amber-500/30 flex flex-col justify-between shadow-[inset_0_0_10px_rgba(245,158,11,0.15)]">
-                            <span class="text-[9px] font-mono-telemetry text-slate-400 uppercase tracking-wider block border-b border-slate-800/80 pb-1">${cell.header}</span>
-                            <span class="text-sm sm:text-base font-black text-amber-300 font-mono-telemetry mt-1.5 block tracking-tight">${cell.value}</span>
-                        </div>`;
+                            <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 flex justify-between items-center">
+                                <span class="text-xs font-semibold text-slate-300 uppercase">${cell.header}</span>
+                                <span class="text-sm font-bold font-mono-telemetry text-white">${(cell.value || 0).toLocaleString('id-ID')}</span>
+                            </div>
+                        `;
                     });
                 }
                 pmlGrid.innerHTML = gridHtml;
-
-                let target = 0;
-                let didata = 0;
-                let xlsPct = '';
-                if (item.rawCells && Array.isArray(item.rawCells)) {
-                    item.rawCells.forEach(cell => {
-                        const h = (cell.header || '').toLowerCase();
-                        const vNum = parseInt(String(cell.value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                        if (h.includes('target') || h.includes('prelist')) {
-                            if (target === 0) target = vNum;
-                        } else if (h.includes('responden didata') || (h.includes('didata') && !h.includes('draft') && !h.includes('%'))) {
-                            if (didata === 0) didata = vNum;
-                        } else if (h.includes('persentase') || h.includes('progress') || (h.includes('%') && !h.includes('draft'))) {
-                            if (!xlsPct && cell.value !== undefined) xlsPct = cell.value;
-                        }
-                    });
-                    if (target === 0 && item.rawCells.length > 1) {
-                        target = parseInt(String(item.rawCells[1].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-                    if (didata === 0 && item.rawCells.length > 2) {
-                        didata = parseInt(String(item.rawCells[2].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-                }
-                
-                pmlTitle.innerText = didata.toLocaleString('id-ID');
-                const sisa = Math.max(target - didata, 0);
-                pmlSisa.innerText = sisa.toLocaleString('id-ID');
-                pmlSisaMob.innerText = sisa.toLocaleString('id-ID');
-
-                const pct = target > 0 ? ((didata / target) * 100) : 0;
-                pmlPctVal.innerText = (xlsPct && xlsPct !== '') ? xlsPct : pct.toFixed(1) + '%';
-                pmlPctBar.style.height = Math.min(Math.max(pct, 0), 100) + '%';
             });
         }
 
@@ -503,7 +466,6 @@
                     return;
                 }
 
-                // Otomatis tutup/reset tampilan PML jika PCL dipilih
                 if (pmlSelect) pmlSelect.value = "";
                 if (pmlPlace) pmlPlace.classList.remove('hidden');
                 if (pmlCont) pmlCont.classList.add('hidden');
@@ -514,79 +476,25 @@
                 pclPlace.classList.add('hidden');
                 pclCont.classList.remove('hidden');
 
+                pclPctVal.innerText = (item.percentage || 0).toFixed(1) + '%';
+                pclPctBar.style.height = Math.min(Math.max(item.percentage || 0, 0), 100) + '%';
+                pclHarianVal.innerText = (item.harian || 0).toLocaleString('id-ID');
+                pclSisa.innerText = (item.sisaTarget || 0).toLocaleString('id-ID');
+                pclSisaMob.innerText = (item.sisaTarget || 0).toLocaleString('id-ID');
+
                 let gridHtml = '';
                 if (item.rawCells && Array.isArray(item.rawCells)) {
                     let cells = getFilteredCells(item.rawCells);
-
-                    cells.sort((a, b) => {
-                        const ha = (a.header || '').toLowerCase();
-                        const hb = (b.header || '').toLowerCase();
-                        const isProgressA = ha.includes('progress');
-                        const isProgressB = hb.includes('progress');
-                        if (isProgressA) return -1;
-                        if (isProgressB) return 1;
-                        return 0;
-                    });
-
-                    cells.forEach((cell) => {
+                    cells.forEach(cell => {
                         gridHtml += `
-                        <div class="bg-black/80 rounded-xl p-3 border border-amber-500/30 flex flex-col justify-between shadow-[inset_0_0_10px_rgba(245,158,11,0.15)]">
-                            <span class="text-[9px] font-mono-telemetry text-slate-400 uppercase tracking-wider block border-b border-slate-800/80 pb-1">${cell.header}</span>
-                            <span class="text-sm sm:text-base font-black text-amber-300 font-mono-telemetry mt-1.5 block tracking-tight">${cell.value}</span>
-                        </div>`;
+                            <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 flex justify-between items-center">
+                                <span class="text-xs font-semibold text-slate-300 uppercase">${cell.header}</span>
+                                <span class="text-sm font-bold font-mono-telemetry text-white">${(cell.value || 0).toLocaleString('id-ID')}</span>
+                            </div>
+                        `;
                     });
                 }
                 pclGrid.innerHTML = gridHtml;
-
-                let target = 0;
-                let didata = 0;
-                let harian = 0;
-                let xlsPct = '';
-                
-                if (item.rawCells && Array.isArray(item.rawCells)) {
-                    if (item.rawCells.length > 7 && item.rawCells[7]) {
-                        harian = parseInt(String(item.rawCells[7].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-
-                    item.rawCells.forEach(cell => {
-                        const h = (cell.header || '').toLowerCase();
-                        const vNum = parseInt(String(cell.value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                        if (h.includes('target') || h.includes('prelist')) {
-                            if (target === 0) target = vNum;
-                        } else if (h.includes('responden didata') || (h.includes('didata') && !h.includes('%'))) {
-                            if (didata === 0) didata = vNum;
-                        } else if (h.includes('persentase') || h.includes('progress') || h.includes('%')) {
-                            if (!xlsPct && cell.value !== undefined) xlsPct = cell.value;
-                        }
-                    });
-                    if (target === 0 && item.rawCells.length > 1) {
-                        target = parseInt(String(item.rawCells[1].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-                    if (didata === 0 && item.rawCells.length > 2) {
-                        didata = parseInt(String(item.rawCells[2].value || '0').replace(/[^0-9]/g, ''), 10) || 0;
-                    }
-                }
-
-                const sisa = Math.max(target - didata, 0);
-                pclSisa.innerText = sisa.toLocaleString('id-ID');
-                pclSisaMob.innerText = sisa.toLocaleString('id-ID');
-                
-                if (pclHarianVal && pclHarianBox) {
-                    pclHarianVal.innerText = harian.toLocaleString('id-ID');
-                    pclHarianBox.classList.remove('border-green-500/50', 'shadow-[0_0_12px_rgba(34,197,94,0.3)]', 'border-rose-500/50', 'shadow-[0_0_12px_rgba(244,63,94,0.3)]');
-                    pclHarianVal.classList.remove('text-green-400', 'text-rose-400');
-                    if (harian >= 10) {
-                        pclHarianBox.classList.add('border-green-500/50', 'shadow-[0_0_12px_rgba(34,197,94,0.3)]');
-                        pclHarianVal.classList.add('text-green-400');
-                    } else {
-                        pclHarianBox.classList.add('border-rose-500/50', 'shadow-[0_0_12px_rgba(244,63,94,0.3)]');
-                        pclHarianVal.classList.add('text-rose-400');
-                    }
-                }
-
-                const pct = target > 0 ? ((didata / target) * 100) : 0;
-                pclPctVal.innerText = (xlsPct && xlsPct !== '') ? xlsPct : pct.toFixed(1) + '%';
-                pclPctBar.style.height = Math.min(Math.max(pct, 0), 100) + '%';
             });
         }
     </script>
