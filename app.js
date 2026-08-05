@@ -2,15 +2,14 @@ const express = require('express');
 const { google } = require('googleapis');
 const xlsx = require('xlsx');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ID Folder Utama Google Drive
-const MAIN_FOLDER_ID = '1h3RtIf9YRpBlnIHxgI0WHSCfEyw4_0DT';
+// ID Folder Google Drive terbaru
+const MAIN_FOLDER_ID = '1kyI4AOQCfu8r1c4qDMZZF28bxWU2dO17';
 
 let drive;
 try {
@@ -36,7 +35,6 @@ try {
     console.error('❌ Gagal memuat Google Auth:', e.message);
 }
 
-// Fungsi Parser Angka Mutlak
 const parseStrictNumber = (val) => {
     if (val === undefined || val === null || val === '-' || val === '') return 0;
     if (typeof val === 'number') return Math.round(val);
@@ -49,58 +47,8 @@ const parseStrictNumber = (val) => {
     return parseInt(str, 10) || 0;
 };
 
-// ==========================================
-// MESIN SCANNER VERTIKAL (ANTI MERGED-CELLS)
-// ==========================================
-const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
-    let maxCols = 0;
-    const maxRowsToScan = Math.min(rows.length, 15);
-    for (let i = 0; i < maxRowsToScan; i++) {
-        if (rows[i] && rows[i].length > maxCols) maxCols = rows[i].length;
-    }
-
-    const scan = (keywords, exactMatchOnly = false) => {
-        for (let kw of keywords) {
-            let cleanKw = kw.toLowerCase().replace(/[^a-z0-9+]/g, '');
-            for (let col = 0; col < maxCols; col++) {
-                let colText = '';
-                for (let row = 0; row < maxRowsToScan; row++) {
-                    if (rows[row] && rows[row][col] !== undefined) {
-                        colText += String(rows[row][col]).toLowerCase().replace(/[^a-z0-9+]/g, '');
-                    }
-                }
-                if (exactMatchOnly) {
-                    if (colText === cleanKw) return col;
-                } else {
-                    if (colText.includes(cleanKw)) return col;
-                }
-            }
-        }
-        return -1;
-    };
-
-    let idx = scan(exactKeywords, true); // Cari exact match dulu
-    if (idx === -1) idx = scan(exactKeywords, false);
-    if (idx === -1) idx = scan(partialKeywords, false);
-    return idx;
-};
-
-const getValidName = (r) => {
-    if (r[1] !== undefined) {
-        let val = String(r[1]).trim();
-        if (val && !val.includes('@') && isNaN(val) && val.length > 2) return val;
-    }
-    for (let idx = 1; idx < Math.min(r.length, 5); idx++) {
-        if (r[idx] !== undefined) {
-            let val = String(r[idx]).trim();
-            if (val && !val.includes('@') && isNaN(val) && val.length > 3) return val;
-        }
-    }
-    return '';
-};
-
 const fetchExcelRows = async (folderId, keywords) => {
-    if (!drive) return [];
+    if (!drive) return { rows: [], modifiedTime: null };
     
     const searchInParent = async (parentId) => {
         try {
@@ -151,10 +99,24 @@ const fetchExcelRows = async (folderId, keywords) => {
     }
 };
 
+const getValidName = (r) => {
+    if (r[1] !== undefined) {
+        let val = String(r[1]).trim();
+        if (val && !val.includes('@') && isNaN(val) && val.length > 2) return val;
+    }
+    for (let idx = 1; idx < Math.min(r.length, 5); idx++) {
+        if (r[idx] !== undefined) {
+            let val = String(r[idx]).trim();
+            if (val && !val.includes('@') && isNaN(val) && val.length > 3) return val;
+        }
+    }
+    return '';
+};
+
 const parseDesaData = (rows) => {
     if (!rows || rows.length === 0) return [];
-    let targetIdx = getBulletproofColIndex(rows, ['target', 'jumlahusaha']);
-    let didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi', 'selesai']);
+    let targetIdx = 2;
+    let didataIdx = 3;
     
     let dataStartIdx = rows.findIndex((r, idx) => idx > 1 && r && (r[0] === 1 || String(r[0]).trim() === '1'));
     if (dataStartIdx === -1) dataStartIdx = 3;
@@ -164,8 +126,8 @@ const parseDesaData = (rows) => {
         if (!name) return null;
         return {
             name,
-            target: targetIdx !== -1 ? parseStrictNumber(r[targetIdx]) : 0,
-            didata: didataIdx !== -1 ? parseStrictNumber(r[didataIdx]) : 0
+            target: parseStrictNumber(r[targetIdx]),
+            didata: parseStrictNumber(r[didataIdx])
         };
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
@@ -176,44 +138,24 @@ const parsePetugas = (rows, role) => {
     let dataStartIdx = rows.findIndex((r, idx) => idx > 1 && r && (r[0] === 1 || String(r[0]).trim() === '1'));
     if (dataStartIdx === -1) dataStartIdx = 3;
 
-    let targetIdx = getBulletproofColIndex(rows, ['targetprelist', 'jumlahusaha', 'slsditarget', 'prelist'], ['target']);
-    
-    // PENGECUALIAN MUTLAK: Hindari kolom yang mengandung kata 'draft' untuk Responden Didata PCL
-    let didataIdx = -1;
+    let targetIdx, didataIdx, harianIdx, pctDraftIdx;
+
+    if (role === 'pcl') {
+        // PCL: Kolom 5 = Target, Kolom 6 = Responden Didata (Murni tanpa draft), Kolom 7 = Harian (+Didata)
+        targetIdx = 5;
+        didataIdx = 6;
+        harianIdx = 7;
+        pctDraftIdx = 8;
+    } else {
+        targetIdx = 4;
+        didataIdx = 5;
+        harianIdx = 6;
+        pctDraftIdx = 7;
+    }
+
     let maxCols = 0;
     for (let i = 0; i < Math.min(rows.length, 15); i++) {
         if (rows[i] && rows[i].length > maxCols) maxCols = rows[i].length;
-    }
-
-    for (let c = 0; c < maxCols; c++) {
-        let colText = '';
-        for (let r = 0; r < Math.min(rows.length, 15); r++) {
-            if (rows[r] && rows[r][c] !== undefined) {
-                colText += String(rows[r][c]).toLowerCase().replace(/[^a-z0-9]/g, '');
-            }
-        }
-        if ((colText.includes('respondendidata') || colText === 'didata') && !colText.includes('draft')) {
-            didataIdx = c;
-            break;
-        }
-    }
-
-    if (didataIdx === -1) {
-        didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi', 'selesai'], ['didata']);
-    }
-
-    let harianIdx = getBulletproofColIndex(rows, ['+didata', 'progressharian', 'harian'], ['+']);
-    let pctDraftIdx = getBulletproofColIndex(rows, ['persentase', 'didatadraft', 'draft', 'capaian'], ['%']);
-
-    if (role === 'pcl') {
-        if (targetIdx === -1) targetIdx = 5;
-        if (didataIdx === -1) didataIdx = 6;
-        if (harianIdx === -1) harianIdx = 7;
-    } else {
-        if (targetIdx === -1) targetIdx = 4;
-        if (didataIdx === -1) didataIdx = 5;
-        if (harianIdx === -1) harianIdx = 6;
-        if (pctDraftIdx === -1) pctDraftIdx = 7;
     }
 
     let compositeHeaders = [];
@@ -239,14 +181,14 @@ const parsePetugas = (rows, role) => {
         let didataVal = parseStrictNumber(r[didataIdx]);
         let harianVal = parseStrictNumber(r[harianIdx]);
 
-        let rawPctDraft = pctDraftIdx !== -1 ? r[pctDraftIdx] : (targetVal > 0 ? (didataVal / targetVal) * 100 : 0);
+        let rawPctDraft = pctDraftIdx !== -1 && r[pctDraftIdx] !== undefined ? r[pctDraftIdx] : (targetVal > 0 ? (didataVal / targetVal) * 100 : 0);
         let formattedPctDraft = rawPctDraft;
         if (typeof rawPctDraft === 'number') {
             formattedPctDraft = (rawPctDraft >= 0 && rawPctDraft <= 1 ? rawPctDraft * 100 : rawPctDraft).toFixed(2) + '%';
         } else if (typeof rawPctDraft === 'string') {
             let num = parseFloat(rawPctDraft.replace('%', '').replace(',', '.'));
             if (!isNaN(num)) {
-                formattedPctDraft = (num >= 0 && num <= 1 ? num * 100 : num).toFixed(2) + '%';
+                formattedPctDraft = (num <= 1 ? num * 100 : num).toFixed(2) + '%';
             }
         }
 
@@ -268,16 +210,6 @@ const parsePetugas = (rows, role) => {
         for (let idx = 0; idx < rowCols; idx++) {
             let h = compositeHeaders[idx] || `Kolom_${idx}`;
             let val = r[idx] !== undefined ? r[idx] : '-';
-            
-            if (typeof val === 'number' && val >= 0 && val <= 1) {
-                let hLower = h.toLowerCase();
-                if (hLower.includes('%') || hLower.includes('persen') || hLower.includes('progress') || hLower.includes('capaian')) {
-                    val = (val * 100).toFixed(2) + '%';
-                }
-            } else if (typeof val === 'string' && (val.toLowerCase().includes('%') || val.toLowerCase().includes('persen'))) {
-                let num = parseFloat(val.replace(',', '.'));
-                if (!isNaN(num)) val = (num <= 1 ? num * 100 : num).toFixed(2) + '%';
-            }
             rowObj.rawCells.push({ header: h, value: val });
         }
 
@@ -309,13 +241,10 @@ app.get('/', async (req, res) => {
 
             const kecRows = kecRes.rows;
             if (kecRows && kecRows.length > 0) {
-                let targetIdx = getBulletproofColIndex(kecRows, ['target', 'jumlahusaha']);
-                let didataIdx = getBulletproofColIndex(kecRows, ['respondendidata', 'realisasi', 'selesai']);
                 let kretekRow = kecRows.find(r => r.join(' ').toLowerCase().includes('kretek') || r.join(' ').toLowerCase().includes('3402030'));
-                
                 if (kretekRow) {
-                    totalTargetKretek = targetIdx !== -1 ? parseStrictNumber(kretekRow[targetIdx]) : 0;
-                    totalDidataKretek = didataIdx !== -1 ? parseStrictNumber(kretekRow[didataIdx]) : 0;
+                    totalTargetKretek = parseStrictNumber(kretekRow[2]);
+                    totalDidataKretek = parseStrictNumber(kretekRow[3]);
                     if (totalTargetKretek > 0) persentaseKretek = ((totalDidataKretek / totalTargetKretek) * 100).toFixed(1);
                 }
             }
