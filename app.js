@@ -9,7 +9,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ID Folder Utama Google Drive
-const MAIN_FOLDER_ID = '1h3RtIf9YRpBlnIHxgI0WHSCfEyw4_0DT';
+const MAIN_FOLDER_ID = '1kyl4AOQCfu8r1c4qDMZZF28bxWU2dO17';
 
 let drive;
 try {
@@ -43,17 +43,16 @@ const parseStrictNumber = (val) => {
 // ==========================================
 const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
     let maxCols = 0;
-    const maxRowsToScan = Math.min(rows.length, 15); // Scan 15 baris pertama
+    const maxRowsToScan = Math.min(rows.length, 15);
     for (let i = 0; i < maxRowsToScan; i++) {
         if (rows[i] && rows[i].length > maxCols) maxCols = rows[i].length;
     }
 
     const scan = (keywords) => {
         for (let kw of keywords) {
-            let cleanKw = kw.toLowerCase().replace(/[^a-z0-9+]/g, ''); // Buang semua spasi & karakter aneh
+            let cleanKw = kw.toLowerCase().replace(/[^a-z0-9+]/g, '');
             for (let col = 0; col < maxCols; col++) {
                 let colText = '';
-                // Gabungkan teks dari atas ke bawah (menembus merged cells)
                 for (let row = 0; row < maxRowsToScan; row++) {
                     if (rows[row] && rows[row][col] !== undefined) {
                         colText += String(rows[row][col]).toLowerCase().replace(/[^a-z0-9+]/g, '');
@@ -145,10 +144,13 @@ const parseDesaData = (rows) => {
     return rows.slice(dataStartIdx).map(r => {
         let name = getValidName(r);
         if (!name) return null;
+        let tVal = targetIdx !== -1 ? parseStrictNumber(r[targetIdx]) : 0;
+        let dVal = didataIdx !== -1 ? parseStrictNumber(r[didataIdx]) : 0;
         return {
             name,
-            target: targetIdx !== -1 ? parseStrictNumber(r[targetIdx]) : 0,
-            didata: didataIdx !== -1 ? parseStrictNumber(r[didataIdx]) : 0
+            target: tVal,
+            didata: dVal,
+            sisa: Math.max(0, tVal - dVal)
         };
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
@@ -159,21 +161,11 @@ const parsePetugas = (rows, role) => {
     let dataStartIdx = rows.findIndex((r, idx) => idx > 1 && r && (r[0] === 1 || String(r[0]).trim() === '1'));
     if (dataStartIdx === -1) dataStartIdx = 3;
 
-    let targetIdx = getBulletproofColIndex(rows, ['targetprelist', 'jumlahusaha', 'slsditarget', 'prelist'], ['target']);
-    let didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi', 'selesai'], ['didata']);
-    let harianIdx = getBulletproofColIndex(rows, ['+didata', 'progressharian', 'harian'], ['+']);
-    let pctDraftIdx = getBulletproofColIndex(rows, ['persentase', 'didatadraft', 'draft', 'capaian'], ['%']);
-
-    if (role === 'pcl') {
-        if (targetIdx === -1) targetIdx = 5;
-        if (didataIdx === -1) didataIdx = 6;
-        harianIdx = 7; // Kolom index ke-7 untuk PCL (+ Didata / Harian)
-    } else {
-        if (targetIdx === -1) targetIdx = 4;
-        if (didataIdx === -1) didataIdx = 5;
-        if (harianIdx === -1) harianIdx = 6;
-        if (pctDraftIdx === -1) pctDraftIdx = 7;
-    }
+    // Pemetaan posisi kolom mutlak sesuai file Excel rekap_petugas
+    let targetIdx = 5; // Kolom F (Target Prelist)
+    let didataIdx = 6; // Kolom G (Responden Didata)
+    let harianIdx = 7; // Kolom H (+ Didata)
+    let pctIdx = 8;    // Kolom I (% Didata)
 
     let compositeHeaders = [];
     let maxCols = 0;
@@ -192,6 +184,7 @@ const parsePetugas = (rows, role) => {
         if (c === targetIdx) label = 'Target Prelist';
         if (c === didataIdx) label = 'Responden Didata';
         if (c === harianIdx) label = '+ Didata';
+        if (c === pctIdx) label = '% Didata';
         compositeHeaders[c] = label || `Kolom_${c}`;
     }
 
@@ -201,49 +194,55 @@ const parsePetugas = (rows, role) => {
 
         let targetVal = parseStrictNumber(r[targetIdx]);
         let didataVal = parseStrictNumber(r[didataIdx]);
-        
-        // Memastikan harianVal membaca secara presisi indeks r[7] untuk role pcl atau menggunakan harianIdx
-        let harianVal = parseStrictNumber(role === 'pcl' ? r[7] : r[harianIdx]);
+        let harianVal = parseStrictNumber(r[harianIdx]);
 
-        let rawPctDraft = pctDraftIdx !== -1 ? r[pctDraftIdx] : (targetVal > 0 ? (didataVal / targetVal) * 100 : 0);
-        let formattedPctDraft = rawPctDraft;
-        if (typeof rawPctDraft === 'number') {
-            formattedPctDraft = (rawPctDraft >= 0 && rawPctDraft <= 1 ? rawPctDraft * 100 : rawPctDraft).toFixed(2) + '%';
-        } else if (typeof rawPctDraft === 'string') {
-            let num = parseFloat(rawPctDraft.replace('%', '').replace(',', '.'));
-            if (!isNaN(num)) {
-                formattedPctDraft = (num >= 0 && num <= 1 ? num * 100 : num).toFixed(2) + '%';
+        // Perhitungan Sisa Target Murni: Target Prelist - Responden Didata
+        let sisaTargetVal = Math.max(0, targetVal - didataVal);
+
+        // Perhitungan / Pengambilan Persentase
+        let rawPct = r[pctIdx];
+        let formattedPct = '0.0%';
+        let numericPct = 0;
+
+        if (rawPct !== undefined && rawPct !== null && rawPct !== '' && rawPct !== '-') {
+            let strPct = String(rawPct).trim();
+            if (!strPct.includes('%')) {
+                let num = parseFloat(strPct.replace(',', '.'));
+                if (!isNaN(num)) {
+                    numericPct = num <= 1 ? num * 100 : num;
+                    formattedPct = numericPct.toFixed(1) + '%';
+                }
+            } else {
+                formattedPct = strPct;
+                numericPct = parseFloat(strPct.replace('%', '').trim()) || 0;
             }
+        } else if (targetVal > 0) {
+            numericPct = (didataVal / targetVal) * 100;
+            formattedPct = numericPct.toFixed(1) + '%';
         }
 
+        // KUMPULAN KUNCI LENGKAP (Kompatibel dengan semua template EJS)
         let rowObj = { 
             name, 
-            rawCells: [], 
             target: targetVal, 
+            targetPrelist: targetVal,
             didata: didataVal, 
             realisasi: didataVal,
             respondenDidata: didataVal,
             harian: harianVal, 
-            progress: harianVal,
-            sisaTarget: Math.max(0, targetVal - didataVal),
-            persentaseDidataDraft: formattedPctDraft,
-            persentase: formattedPctDraft
+            progress: formattedPct,
+            progressVal: numericPct,
+            persentase: formattedPct,
+            persentaseDidataDraft: formattedPct,
+            sisaTarget: sisaTargetVal,
+            sisa: sisaTargetVal,
+            rawCells: []
         };
         
         let rowCols = Math.max(compositeHeaders.length, r.length);
         for (let idx = 0; idx < rowCols; idx++) {
             let h = compositeHeaders[idx] || `Kolom_${idx}`;
             let val = r[idx] !== undefined ? r[idx] : '-';
-            
-            if (typeof val === 'number' && val >= 0 && val <= 1) {
-                let hLower = h.toLowerCase();
-                if (hLower.includes('%') || hLower.includes('persen') || hLower.includes('progress') || hLower.includes('capaian')) {
-                    val = (val * 100).toFixed(2) + '%';
-                }
-            } else if (typeof val === 'string' && (val.toLowerCase().includes('%') || val.toLowerCase().includes('persen'))) {
-                let num = parseFloat(val.replace(',', '.'));
-                if (!isNaN(num)) val = (num <= 1 ? num * 100 : num).toFixed(2) + '%';
-            }
             rowObj.rawCells.push({ header: h, value: val });
         }
 
@@ -262,16 +261,30 @@ app.get('/', async (req, res) => {
         if (drive) {
             let targetFolderId = MAIN_FOLDER_ID;
             try {
-                const folderRes = await drive.files.list({
-                    q: `'${MAIN_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-                    orderBy: 'name desc', pageSize: 50
-                });
-                const folders = folderRes.data.files;
-                if (folders && folders.length > 0) {
-                    activeDate = folders[0].name;
-                    targetFolderId = folders[0].id;
+                let folderRes;
+                try {
+                    folderRes = await drive.files.list({
+                        q: `'${MAIN_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+                        orderBy: 'name desc',
+                        pageSize: 10
+                    });
+                } catch (err) {
+                    folderRes = await drive.files.list({
+                        q: `mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+                        orderBy: 'name desc',
+                        pageSize: 10
+                    });
                 }
-            } catch (e) {}
+
+                const folders = folderRes.data.files || [];
+                if (folders.length > 0) {
+                    const validFolder = folders.find(f => /^\d{4}-\d{2}-\d{2}$/.test(f.name.trim())) || folders[0];
+                    activeDate = validFolder.name;
+                    targetFolderId = validFolder.id;
+                }
+            } catch (e) {
+                console.error("Gagal mengambil folder:", e.message);
+            }
 
             const [kecRows, desaRows, pmlRows, pclRows] = await Promise.all([
                 fetchExcelRows(targetFolderId, ['rekap_wilayah_kecamatan', 'kecamatan', 'kec']),
