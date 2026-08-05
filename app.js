@@ -101,7 +101,10 @@ const fetchExcelRows = async (folderId, keywords) => {
         try {
             const qQuery = parentId ? `'${parentId}' in parents and trashed = false` : `trashed = false`;
             const res = await drive.files.list({
-                q: qQuery, pageSize: 100, fields: 'files(id, name, mimeType)', orderBy: 'name desc'
+                q: qQuery, 
+                pageSize: 100, 
+                fields: 'files(id, name, mimeType, modifiedTime)', 
+                orderBy: 'modifiedTime desc' // Wajib urutkan berdasarkan waktu modifikasi terbaru
             });
             return res.data.files || [];
         } catch (e) { return []; }
@@ -112,12 +115,12 @@ const fetchExcelRows = async (folderId, keywords) => {
         if (files.length === 0 && folderId !== MAIN_FOLDER_ID) files = await searchInParent(MAIN_FOLDER_ID);
         if (files.length === 0) files = await searchInParent(null);
 
-        files.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+        files.sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
         let matchedFile = files.find(f => keywords.some(kw => f.name && f.name.toLowerCase().includes(kw.toLowerCase())));
 
         if (!matchedFile) {
             console.warn(`⚠️ File [${keywords.join(', ')}] tidak ditemukan.`);
-            return [];
+            return { rows: [], modifiedTime: null };
         }
 
         const fileId = matchedFile.id;
@@ -135,10 +138,11 @@ const fetchExcelRows = async (folderId, keywords) => {
         }
 
         const wb = xlsx.read(buffer, { type: 'buffer' });
-        return xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }) || [];
+        const sheetRows = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }) || [];
+        return { rows: sheetRows, modifiedTime: matchedFile.modifiedTime };
     } catch (err) {
         console.error(`⚠️ Gagal baca file [${keywords.join(', ')}]:`, err.message);
-        return [];
+        return { rows: [], modifiedTime: null };
     }
 };
 
@@ -266,28 +270,21 @@ app.get('/', async (req, res) => {
 
     try {
         if (drive) {
-            let targetFolderId = MAIN_FOLDER_ID;
-            try {
-                const folderRes = await drive.files.list({
-                    q: `'${MAIN_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-                    orderBy: 'name desc', pageSize: 50
-                });
-                const folders = folderRes.data.files;
-                if (folders && folders.length > 0) {
-                    activeDate = folders[0].name;
-                    targetFolderId = folders[0].id;
-                }
-            } catch (e) {
-                console.warn("⚠️ Gagal mengambil subfolder tanggal, menggunakan folder utama:", e.message);
-            }
-
-            const [kecRows, desaRows, pmlRows, pclRows] = await Promise.all([
-                fetchExcelRows(targetFolderId, ['rekap_wilayah_kecamatan', 'kecamatan', 'kec']),
-                fetchExcelRows(targetFolderId, ['rekap_wilayah_desa', 'desa', 'kalurahan']),
-                fetchExcelRows(targetFolderId, ['rekap_petugas_pml', 'pml', 'petugas_pml']),
-                fetchExcelRows(targetFolderId, ['rekap_petugas_pcl', 'pcl', 'petugas_pcl'])
+            const [kecRes, desaRes, pmlRes, pclRes] = await Promise.all([
+                fetchExcelRows(MAIN_FOLDER_ID, ['rekap_wilayah_kecamatan', 'kecamatan', 'kec']),
+                fetchExcelRows(MAIN_FOLDER_ID, ['rekap_wilayah_desa', 'desa', 'kalurahan']),
+                fetchExcelRows(MAIN_FOLDER_ID, ['rekap_petugas_pml', 'pml', 'petugas_pml']),
+                fetchExcelRows(MAIN_FOLDER_ID, ['rekap_petugas_pcl', 'pcl', 'petugas_pcl'])
             ]);
 
+            // Ambil tanggal aktif dari file yang paling baru dimodifikasi di Google Drive
+            let dates = [kecRes.modifiedTime, desaRes.modifiedTime, pmlRes.modifiedTime, pclRes.modifiedTime].filter(Boolean);
+            if (dates.length > 0) {
+                dates.sort((a, b) => new Date(b) - new Date(a));
+                activeDate = dates[0].split('T')[0];
+            }
+
+            const kecRows = kecRes.rows;
             if (kecRows && kecRows.length > 0) {
                 let targetIdx = getBulletproofColIndex(kecRows, ['target', 'jumlahusaha']);
                 let didataIdx = getBulletproofColIndex(kecRows, ['respondendidata', 'realisasi', 'selesai']);
@@ -300,9 +297,9 @@ app.get('/', async (req, res) => {
                 }
             }
 
-            parsedDesa = parseDesaData(desaRows);
-            detailedPml = parsePetugas(pmlRows, 'pml');
-            detailedPcl = parsePetugas(pclRows, 'pcl');
+            parsedDesa = parseDesaData(desaRes.rows);
+            detailedPml = parsePetugas(pmlRes.rows, 'pml');
+            detailedPcl = parsePetugas(pclRes.rows, 'pcl');
 
             if (detailedPcl.length > 0) {
                 topPcl = [...detailedPcl].sort((a, b) => b.harian - a.harian).slice(0, 5);
