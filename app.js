@@ -2,6 +2,7 @@ const express = require('express');
 const { google } = require('googleapis');
 const xlsx = require('xlsx');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
@@ -13,16 +14,27 @@ const MAIN_FOLDER_ID = '1h3RtIf9YRpBlnIHxgI0WHSCfEyw4_0DT';
 
 let drive;
 try {
-    drive = google.drive({
-        version: 'v3',
-        auth: new google.auth.GoogleAuth({
+    let authConfig;
+    // Pengecekan cerdas: jika ada environment variable, pakai env; jika tidak, pakai file lokal service-account.json
+    if (process.env.GOOGLE_CREDENTIALS) {
+        authConfig = {
+            credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+            scopes: ['https://www.googleapis.com/auth/drive.readonly']
+        };
+    } else {
+        authConfig = {
             keyFile: path.join(__dirname, 'service-account.json'),
             scopes: ['https://www.googleapis.com/auth/drive.readonly']
-        })
+        };
+    }
+
+    drive = google.drive({
+        version: 'v3',
+        auth: new google.auth.GoogleAuth(authConfig)
     });
     console.log('✅ Konfigurasi Google Auth berhasil.');
 } catch (e) {
-    console.error('❌ Gagal memuat service-account.json:', e.message);
+    console.error('❌ Gagal memuat Google Auth:', e.message);
 }
 
 // Fungsi Parser Angka Mutlak
@@ -43,17 +55,16 @@ const parseStrictNumber = (val) => {
 // ==========================================
 const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
     let maxCols = 0;
-    const maxRowsToScan = Math.min(rows.length, 15); // Scan 15 baris pertama
+    const maxRowsToScan = Math.min(rows.length, 15);
     for (let i = 0; i < maxRowsToScan; i++) {
         if (rows[i] && rows[i].length > maxCols) maxCols = rows[i].length;
     }
 
     const scan = (keywords) => {
         for (let kw of keywords) {
-            let cleanKw = kw.toLowerCase().replace(/[^a-z0-9+]/g, ''); // Buang semua spasi & karakter aneh
+            let cleanKw = kw.toLowerCase().replace(/[^a-z0-9+]/g, '');
             for (let col = 0; col < maxCols; col++) {
                 let colText = '';
-                // Gabungkan teks dari atas ke bawah (menembus merged cells)
                 for (let row = 0; row < maxRowsToScan; row++) {
                     if (rows[row] && rows[row][col] !== undefined) {
                         colText += String(rows[row][col]).toLowerCase().replace(/[^a-z0-9+]/g, '');
@@ -70,7 +81,6 @@ const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
     return idx;
 };
 
-// Pencari Nama Petugas yang Akurat
 const getValidName = (r) => {
     if (r[1] !== undefined) {
         let val = String(r[1]).trim();
@@ -85,7 +95,6 @@ const getValidName = (r) => {
     return '';
 };
 
-// Fungsi penarik data Excel mentah (Rows)
 const fetchExcelRows = async (folderId, keywords) => {
     if (!drive) return [];
     
@@ -167,7 +176,7 @@ const parsePetugas = (rows, role) => {
     if (role === 'pcl') {
         if (targetIdx === -1) targetIdx = 5;
         if (didataIdx === -1) didataIdx = 6;
-        harianIdx = 7; // Kolom index ke-7 untuk PCL (+ Didata / Harian)
+        harianIdx = 7;
     } else {
         if (targetIdx === -1) targetIdx = 4;
         if (didataIdx === -1) didataIdx = 5;
@@ -201,8 +210,6 @@ const parsePetugas = (rows, role) => {
 
         let targetVal = parseStrictNumber(r[targetIdx]);
         let didataVal = parseStrictNumber(r[didataIdx]);
-        
-        // Memastikan harianVal membaca secara presisi indeks r[7] untuk role pcl atau menggunakan harianIdx
         let harianVal = parseStrictNumber(role === 'pcl' ? r[7] : r[harianIdx]);
 
         let rawPctDraft = pctDraftIdx !== -1 ? r[pctDraftIdx] : (targetVal > 0 ? (didataVal / targetVal) * 100 : 0);
@@ -252,10 +259,10 @@ const parsePetugas = (rows, role) => {
 };
 
 app.get('/', async (req, res) => {
-    let activeDate = '2026-08-03';
-    let persentaseKretek = '80.9';
-    let totalTargetKretek = 14764;
-    let totalDidataKretek = 11939;
+    let activeDate = new Date().toISOString().split('T')[0];
+    let persentaseKretek = '0';
+    let totalTargetKretek = 0;
+    let totalDidataKretek = 0;
     let topPcl = [], bottomPcl = [], parsedDesa = [], detailedPml = [], detailedPcl = [];
 
     try {
@@ -271,7 +278,9 @@ app.get('/', async (req, res) => {
                     activeDate = folders[0].name;
                     targetFolderId = folders[0].id;
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn("⚠️ Gagal mengambil subfolder tanggal, menggunakan folder utama:", e.message);
+            }
 
             const [kecRows, desaRows, pmlRows, pclRows] = await Promise.all([
                 fetchExcelRows(targetFolderId, ['rekap_wilayah_kecamatan', 'kecamatan', 'kec']),
@@ -286,8 +295,8 @@ app.get('/', async (req, res) => {
                 let kretekRow = kecRows.find(r => r.join(' ').toLowerCase().includes('kretek') || r.join(' ').toLowerCase().includes('3402030'));
                 
                 if (kretekRow) {
-                    totalTargetKretek = targetIdx !== -1 ? parseStrictNumber(kretekRow[targetIdx]) : 14764;
-                    totalDidataKretek = didataIdx !== -1 ? parseStrictNumber(kretekRow[didataIdx]) : 11939;
+                    totalTargetKretek = targetIdx !== -1 ? parseStrictNumber(kretekRow[targetIdx]) : 0;
+                    totalDidataKretek = didataIdx !== -1 ? parseStrictNumber(kretekRow[didataIdx]) : 0;
                     if (totalTargetKretek > 0) persentaseKretek = ((totalDidataKretek / totalTargetKretek) * 100).toFixed(1);
                 }
             }
@@ -311,6 +320,7 @@ app.get('/', async (req, res) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log('🚀 Server berjalan sukses di http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server berjalan sukses di port ${PORT}`);
 });
