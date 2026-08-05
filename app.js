@@ -15,7 +15,6 @@ const MAIN_FOLDER_ID = '1h3RtIf9YRpBlnIHxgI0WHSCfEyw4_0DT';
 let drive;
 try {
     let authConfig;
-    // Pengecekan cerdas: jika ada environment variable, pakai env; jika tidak, pakai file lokal service-account.json
     if (process.env.GOOGLE_CREDENTIALS) {
         authConfig = {
             credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
@@ -169,14 +168,14 @@ const parsePetugas = (rows, role) => {
     if (dataStartIdx === -1) dataStartIdx = 3;
 
     let targetIdx = getBulletproofColIndex(rows, ['targetprelist', 'jumlahusaha', 'slsditarget', 'prelist'], ['target']);
-    let didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi', 'selesai'], ['didata']);
+    let didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi', 'selesai', 'didata'], ['responden']);
     let harianIdx = getBulletproofColIndex(rows, ['+didata', 'progressharian', 'harian'], ['+']);
     let pctDraftIdx = getBulletproofColIndex(rows, ['persentase', 'didatadraft', 'draft', 'capaian'], ['%']);
 
     if (role === 'pcl') {
         if (targetIdx === -1) targetIdx = 5;
-        if (didataIdx === -1) didataIdx = 6;
-        harianIdx = 7;
+        if (didataIdx === -1) didataIdx = getBulletproofColIndex(rows, ['respondendidata']) !== -1 ? getBulletproofColIndex(rows, ['respondendidata']) : 6;
+        if (harianIdx === -1) harianIdx = 7;
     } else {
         if (targetIdx === -1) targetIdx = 4;
         if (didataIdx === -1) didataIdx = 5;
@@ -210,7 +209,7 @@ const parsePetugas = (rows, role) => {
 
         let targetVal = parseStrictNumber(r[targetIdx]);
         let didataVal = parseStrictNumber(r[didataIdx]);
-        let harianVal = parseStrictNumber(role === 'pcl' ? r[7] : r[harianIdx]);
+        let harianVal = parseStrictNumber(r[harianIdx]);
 
         let rawPctDraft = pctDraftIdx !== -1 ? r[pctDraftIdx] : (targetVal > 0 ? (didataVal / targetVal) * 100 : 0);
         let formattedPctDraft = rawPctDraft;
