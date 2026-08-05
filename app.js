@@ -59,7 +59,7 @@ const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
         if (rows[i] && rows[i].length > maxCols) maxCols = rows[i].length;
     }
 
-    const scan = (keywords) => {
+    const scan = (keywords, exactMatchOnly = false) => {
         for (let kw of keywords) {
             let cleanKw = kw.toLowerCase().replace(/[^a-z0-9+]/g, '');
             for (let col = 0; col < maxCols; col++) {
@@ -69,14 +69,19 @@ const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
                         colText += String(rows[row][col]).toLowerCase().replace(/[^a-z0-9+]/g, '');
                     }
                 }
-                if (colText.includes(cleanKw)) return col;
+                if (exactMatchOnly) {
+                    if (colText === cleanKw) return col;
+                } else {
+                    if (colText.includes(cleanKw)) return col;
+                }
             }
         }
         return -1;
     };
 
-    let idx = scan(exactKeywords);
-    if (idx === -1) idx = scan(partialKeywords);
+    let idx = scan(exactKeywords, true); // Cari exact match dulu
+    if (idx === -1) idx = scan(exactKeywords, false);
+    if (idx === -1) idx = scan(partialKeywords, false);
     return idx;
 };
 
@@ -104,7 +109,7 @@ const fetchExcelRows = async (folderId, keywords) => {
                 q: qQuery, 
                 pageSize: 100, 
                 fields: 'files(id, name, mimeType, modifiedTime)', 
-                orderBy: 'modifiedTime desc' // Wajib urutkan berdasarkan waktu modifikasi terbaru
+                orderBy: 'modifiedTime desc'
             });
             return res.data.files || [];
         } catch (e) { return []; }
@@ -172,13 +177,37 @@ const parsePetugas = (rows, role) => {
     if (dataStartIdx === -1) dataStartIdx = 3;
 
     let targetIdx = getBulletproofColIndex(rows, ['targetprelist', 'jumlahusaha', 'slsditarget', 'prelist'], ['target']);
-    let didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi', 'selesai', 'didata'], ['responden']);
+    
+    // PENGECUALIAN MUTLAK: Hindari kolom yang mengandung kata 'draft' untuk Responden Didata PCL
+    let didataIdx = -1;
+    let maxCols = 0;
+    for (let i = 0; i < Math.min(rows.length, 15); i++) {
+        if (rows[i] && rows[i].length > maxCols) maxCols = rows[i].length;
+    }
+
+    for (let c = 0; c < maxCols; c++) {
+        let colText = '';
+        for (let r = 0; r < Math.min(rows.length, 15); r++) {
+            if (rows[r] && rows[r][c] !== undefined) {
+                colText += String(rows[r][c]).toLowerCase().replace(/[^a-z0-9]/g, '');
+            }
+        }
+        if ((colText.includes('respondendidata') || colText === 'didata') && !colText.includes('draft')) {
+            didataIdx = c;
+            break;
+        }
+    }
+
+    if (didataIdx === -1) {
+        didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi', 'selesai'], ['didata']);
+    }
+
     let harianIdx = getBulletproofColIndex(rows, ['+didata', 'progressharian', 'harian'], ['+']);
     let pctDraftIdx = getBulletproofColIndex(rows, ['persentase', 'didatadraft', 'draft', 'capaian'], ['%']);
 
     if (role === 'pcl') {
         if (targetIdx === -1) targetIdx = 5;
-        if (didataIdx === -1) didataIdx = getBulletproofColIndex(rows, ['respondendidata']) !== -1 ? getBulletproofColIndex(rows, ['respondendidata']) : 6;
+        if (didataIdx === -1) didataIdx = 6;
         if (harianIdx === -1) harianIdx = 7;
     } else {
         if (targetIdx === -1) targetIdx = 4;
@@ -188,11 +217,6 @@ const parsePetugas = (rows, role) => {
     }
 
     let compositeHeaders = [];
-    let maxCols = 0;
-    for (let r = 0; r < dataStartIdx; r++) {
-        if (rows[r] && rows[r].length > maxCols) maxCols = rows[r].length;
-    }
-
     for (let c = 0; c < maxCols; c++) {
         let label = '';
         for (let r = 0; r < dataStartIdx; r++) {
@@ -277,7 +301,6 @@ app.get('/', async (req, res) => {
                 fetchExcelRows(MAIN_FOLDER_ID, ['rekap_petugas_pcl', 'pcl', 'petugas_pcl'])
             ]);
 
-            // Ambil tanggal aktif dari file yang paling baru dimodifikasi di Google Drive
             let dates = [kecRes.modifiedTime, desaRes.modifiedTime, pmlRes.modifiedTime, pclRes.modifiedTime].filter(Boolean);
             if (dates.length > 0) {
                 dates.sort((a, b) => new Date(b) - new Date(a));
