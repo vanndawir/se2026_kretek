@@ -150,7 +150,7 @@ const parseDesaData = (rows) => {
             name,
             target: tVal,
             didata: dVal,
-            sisa: Math.max(0, tVal - dVal)
+            'Target Prelist Awal pada kolom index ke-5 (kolom F)': Math.max(0, tVal - dVal)
         };
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
@@ -234,8 +234,8 @@ const parsePetugas = (rows, role) => {
             progressVal: numericPct,
             persentase: formattedPct,
             persentaseDidataDraft: formattedPct,
-            sisaTarget: sisaTargetVal,
-            sisa: sisaTargetVal,
+            'Target Prelist Awal dari spreadsheet index ke-5': targetVal,   // Target Prelist Awal dari spreadsheet index ke-5
+            'Target Prelist Awal pada kolom index ke-5 (kolom F)': targetVal,   // Target Prelist Awal pada kolom index ke-5 (kolom F)
             rawCells: []
         };
         
