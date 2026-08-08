@@ -7,37 +7,141 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background: linear-gradient(135deg, #090d16 0%, #171f2f 50%, #1a1006 100%);
             min-height: 100vh;
         }
+
         .font-mono-telemetry {
             font-family: 'JetBrains Mono', monospace;
         }
-        .glass-card { 
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(20, 27, 43, 0.9) 100%); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(249, 115, 22, 0.25); 
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(20, 27, 43, 0.9) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(249, 115, 22, 0.25);
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
-        @keyframes blink-fast {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.15; }
+
+        .target-static {
+            color: #fbbf24 !important;
+            text-shadow: 0 0 12px rgba(251, 191, 36, 0.9);
+            font-weight: 900;
         }
-        .animate-blink {
-            animation: blink-fast 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+        .pcl-progress-default {
+            color: #fbbf24 !important;
+            text-shadow: 0 0 12px rgba(251, 191, 36, 0.9);
+        }
+
+        .pcl-progress-bar {
+            background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%) !important;
+            box-shadow: 0 0 16px rgba(251, 191, 36, 0.9);
+        }
+
+        .plus-data-ok {
+            color: #22c55e !important;
+            text-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
+            animation: plusOkBlink 0.5s infinite alternate;
+        }
+
+        .plus-data-low {
+            color: #ef4444 !important;
+            text-shadow: 0 0 14px rgba(239, 68, 68, 0.9);
+            animation: plusLowBlink 0.45s infinite alternate;
+        }
+
+        @keyframes plusOkBlink {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.65;
+                transform: scale(1.04);
+            }
+        }
+
+        @keyframes plusLowBlink {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.55;
+                transform: scale(1.08);
+            }
+        }
+
+        #pclAlarmPanel {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            border-radius: 0.9rem;
+            border: 2px solid rgba(239, 68, 68, 0.9);
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.9), rgba(69, 10, 10, 0.95));
+            box-shadow: 0 0 22px rgba(239, 68, 68, 0.9);
+        }
+
+        #pclAlarmPanel.active {
+            display: flex;
+        }
+
+        #stopPclAlarmBtn {
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #111827;
+            border-radius: 0.75rem;
+            padding: 0.5rem 0.8rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        #stopPclAlarmBtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 18px rgba(255,255,255,0.7);
+        }
+
+        #pclLowWarningBar {
+            overflow: hidden;
+            white-space: nowrap;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(239, 68, 68, 0.7);
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.8), rgba(69, 10, 10, 0.95));
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.8);
+        }
+
+        .pcl-warning-text {
+            display: inline-block;
+            padding: 0.45rem 1rem;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #fecaca;
+            animation: warningScroll 7s linear infinite;
+        }
+
+        @keyframes warningScroll {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
         }
     </style>
 </head>
 <body class="text-slate-100 min-h-screen antialiased selection:bg-orange-500 selection:text-white overflow-x-hidden">
-
-    <!-- Splash Screen -->
     <div id="welcomeSplash" class="fixed inset-0 z-[100] bg-gradient-to-b from-orange-600 via-orange-950 to-black flex flex-col items-center justify-center transition-opacity duration-700">
         <img src="/images/logo_kretek.png" alt="Logo Kapanewon Kretek" class="h-44 sm:h-60 w-auto object-contain animate-pulse drop-shadow-2xl" onerror="this.style.display='none'">
     </div>
 
-    <!-- Header -->
     <header class="glass-card sticky top-0 z-50 border-b border-orange-500/30 shadow-2xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
             <div class="flex items-center space-x-3.5 flex-shrink-0">
@@ -63,10 +167,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6">
-
-        <!-- Top Banner -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div class="rounded-2xl shadow-2xl overflow-hidden border-2 border-red-500/80 flex flex-col sm:flex-row items-center justify-between relative">
                 <div class="absolute inset-0 flex flex-col w-full h-full pointer-events-none z-0">
@@ -92,7 +193,13 @@
             </div>
 
             <div class="glass-card rounded-2xl p-5 sm:p-6 shadow-2xl border-l-4 border-l-orange-500 flex items-center justify-between gap-3 sm:gap-4 bg-gradient-to-r from-slate-900/90 via-slate-900/80 to-orange-950/30">
-                <h2 class="text-sm sm:text-lg font-extrabold text-white tracking-wide uppercase">Capaian Pendataan Lapangan</h2>
+                <div class="flex flex-col">
+                    <h2 class="text-sm sm:text-lg font-extrabold text-white tracking-wide uppercase">Capaian Pendataan Lapangan</h2>
+                    <div class="mt-2 text-xl sm:text-2xl font-black text-orange-300 tracking-wide font-mono-telemetry drop-shadow-[0_0_10px_rgba(251,146,60,0.8)]">
+                        3402030
+                    </div>
+                </div>
+
                 <div class="bg-black/90 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border-2 border-orange-500/60 shadow-[0_0_20px_rgba(249,115,22,0.4)] flex items-center space-x-3">
                     <div class="text-right">
                         <span class="block text-[9px] text-orange-400 uppercase tracking-widest font-black">Live Gauge</span>
@@ -105,25 +212,23 @@
             </div>
         </div>
 
-        <!-- Menu Ruang Santai / TikTok Petugas -->
         <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-xl border border-orange-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-slate-900/90 via-orange-950/20 to-slate-900/90">
             <div class="text-center sm:text-left">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-orange-400">Ruang Motivasi & Relaksasi Petugas</span>
                 <h2 class="text-sm sm:text-base font-extrabold text-white mt-0.5">Butuh Dorongan Semangat atau Lagi Lelah / Galau?</h2>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-    <a href="https://www.tiktok.com/@parangrockers/video/7645650383875886356?is_from_webapp=1&sender_device=pc&web_id=7668942723827959313" target="_blank" class="flex-1 sm:flex-none text-center bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-lg border border-orange-400/50 flex items-center justify-center space-x-2 transition transform hover:scale-105">
-        <span>🔥 Saat Butuh Semangat</span>
-        <span class="text-amber-200 animate-pulse">👉</span>
-    </a>
-    <a href="https://www.tiktok.com/@parangrockers/video/7654901051283229972?is_from_webapp=1&sender_device=pc&web_id=7668942723827959313" target="_blank" class="flex-1 sm:flex-none text-center bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-amber-300 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-lg border border-slate-700 flex items-center justify-center space-x-2 transition transform hover:scale-105">
-        <span>☕ Saat Galau & Lelah</span>
-        <span class="text-amber-400 animate-pulse">👉</span>
-    </a>
-</div>
+                <a href="https://www.tiktok.com/@parangrockers/video/7645650383875886356?is_from_webapp=1&sender_device=pc&web_id=7668942723827959313" target="_blank" class="flex-1 sm:flex-none text-center bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-lg border border-orange-400/50 flex items-center justify-center space-x-2 transition transform hover:scale-105">
+                    <span>🔥 Saat Butuh Semangat</span>
+                    <span class="text-amber-200 animate-pulse">👉</span>
+                </a>
+                <a href="https://www.tiktok.com/@parangrockers/video/7654901051283229972?is_from_webapp=1&sender_device=pc&web_id=7668942723827959313" target="_blank" class="flex-1 sm:flex-none text-center bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-amber-300 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-lg border border-slate-700 flex items-center justify-center space-x-2 transition transform hover:scale-105">
+                    <span>☕ Saat Galau & Lelah</span>
+                    <span class="text-amber-400 animate-pulse">👉</span>
+                </a>
+            </div>
         </div>
 
-        <!-- Rekapitulasi Wilayah Desa -->
         <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-xl border-t-4 border-t-amber-500 flex flex-col space-y-4">
             <div class="flex justify-between items-center">
                 <div>
@@ -135,7 +240,7 @@
                 </span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 <% if (typeof parsedDesa === 'undefined' || !parsedDesa || parsedDesa.length === 0) { %>
                     <div class="col-span-full py-8 text-center text-slate-400 italic bg-slate-950/40 rounded-xl border border-slate-800">Tidak ada data desa tersedia</div>
                 <% } else { %>
@@ -178,11 +283,8 @@
             </div>
         </div>
 
-        <!-- Section Petugas PML & PCL -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
-
-            <!-- Petugas PML Card -->
-            <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-xl border-t-4 border-t-amber-500 flex flex-col space-y-4">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+            <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-xl border-t-4 border-t-amber-500 flex flex-col space-y-4 w-full min-w-0">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-wider text-amber-400">Petugas PML</p>
                     <h2 class="text-base font-extrabold text-white mt-0.5">Pilih Nama untuk Rincian</h2>
@@ -206,12 +308,11 @@
                     Silakan pilih nama PML untuk menampilkan rincian data
                 </div>
 
-                <!-- Konten Rincian Dashboard PML -->
                 <div id="pmlContentContainer" class="space-y-3.5 hidden">
-                    <div class="p-3 sm:p-5 rounded-xl border border-slate-700 bg-gradient-to-br from-gray-900 via-black to-gray-900 shadow-[inset_0_0_20px_rgba(255,255,255,0.05),_0_10px_20px_rgba(0,0,0,0.5)] flex-row justify-between items-start sm:items-center gap-3 relative overflow-hidden">
+                    <div class="p-3 sm:p-5 rounded-xl border border-slate-700 bg-gradient-to-br from-gray-900 via-black to-gray-900 shadow-[inset_0_0_20px_rgba(255,255,255,0.05),_0_10px_20px_rgba(0,0,0,0.5)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 relative overflow-hidden">
                         <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #1a1a1a 25%, #1a1a1a 75%, #000 75%, #000); background-position: 0 0, 4px 4px; background-size: 8px 8px;"></div>
-                        
-                        <div class="relative z-10 flex flex-col justify-center">
+
+                        <div class="relative z-10 flex flex-col justify-start">
                             <div class="flex items-center space-x-1 sm:space-x-1.5 mb-1 sm:mb-2">
                                 <div class="w-3 sm:w-4 h-1.5 bg-green-500 skew-x-[15deg] shadow-[0_0_6px_#22c55e]"></div>
                                 <div class="w-3 sm:w-4 h-1.5 bg-green-500 skew-x-[15deg] shadow-[0_0_6px_#22c55e]"></div>
@@ -221,9 +322,14 @@
                                 <div class="w-3 sm:w-4 h-1.5 bg-red-600 skew-x-[15deg] animate-pulse shadow-[0_0_10px_#dc2626]"></div>
                                 <span class="ml-2 text-[8px] sm:text-[10px] font-mono-telemetry font-black text-slate-300 tracking-widest uppercase">RSP. DIDATA</span>
                             </div>
-                            
-                            <div class="flex items-baseline">
-                                <h3 id="pmlSelectedNameTitle" class="text-5xl sm:text-6xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] font-mono-telemetry" style="line-height: 0.85;">0</h3>
+
+                            <div class="flex items-end gap-3">
+                                <div class="text-left">
+                                    <span id="pmlSelectedValue" class="block text-4xl sm:text-6xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] font-mono-telemetry leading-none">0</span>
+                                </div>
+                                <div class="pb-1">
+                                    <span id="pmlSelectedNameTitle" class="block text-[12px] sm:text-[18px] font-bold text-slate-300 tracking-tight leading-none">Nama</span>
+                                </div>
                             </div>
                         </div>
 
@@ -234,27 +340,27 @@
                                     <span id="pmlPercentageValue" class="text-xs sm:text-sm font-black font-mono-telemetry text-amber-300">0%</span>
                                 </div>
                                 <div class="w-2.5 h-6 bg-amber-500/20 rounded-full overflow-hidden flex flex-col justify-end border border-amber-400/60">
-                                    <div id="pmlPercentageBar" class="w-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" style="height: 0%;"></div>
+                                    <div id="pmlPercentageBar" class="w-full bg-amber-400 shadow-[0_0_8px_#fbbf24]" style="height: 0%;"></div>
                                 </div>
                             </div>
+
                             <div class="bg-black/90 px-3.5 py-1.5 rounded-xl border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] text-right hidden sm:block">
-                                <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Sisa Target</span>
-                                <span id="pmlSisaTargetValue" class="text-xl sm:text-2xl font-black font-mono-telemetry animate-blink text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.9)]">0</span>
+                                <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Target Prelist</span>
+                                <span id="pmlSisaTargetValue" class="target-static text-xl sm:text-2xl font-black font-mono-telemetry">0</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="sm:hidden bg-black/90 px-3.5 py-1.5 rounded-xl border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] text-center">
-                        <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Sisa Target</span>
-                        <span id="pmlSisaTargetValueMobile" class="text-xl font-black font-mono-telemetry animate-blink text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.9)]">0</span>
+                        <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Target Prelist</span>
+                        <span id="pmlSisaTargetValueMobile" class="target-static text-xl font-black font-mono-telemetry">0</span>
                     </div>
 
-                    <div id="pmlCockpitGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+                    <div id="pmlCockpitGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5"></div>
                 </div>
             </div>
 
-            <!-- Petugas PCL Card -->
-            <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-xl border-t-4 border-t-amber-500 flex flex-col space-y-4">
+            <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-xl border-t-4 border-t-amber-500 flex flex-col space-y-4 w-full min-w-0">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-wider text-amber-400">Petugas PCL</p>
                     <h2 class="text-base font-extrabold text-white mt-0.5">Pilih Nama untuk Rincian</h2>
@@ -278,11 +384,11 @@
                     Silakan pilih nama PCL untuk menampilkan rincian data
                 </div>
 
-                <!-- Konten Rincian PCL -->
                 <div id="pclContentContainer" class="space-y-3.5 hidden">
                     <div class="p-3 sm:p-5 rounded-xl border border-slate-700 bg-gradient-to-br from-gray-900 via-black to-gray-900 shadow-[inset_0_0_20px_rgba(255,255,255,0.05),_0_10px_20px_rgba(0,0,0,0.5)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 relative overflow-hidden">
-                        
-                        <div class="relative z-10 flex flex-col justify-center">
+                        <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #1a1a1a 25%, #1a1a1a 75%, #000 75%, #000); background-position: 0 0, 4px 4px; background-size: 8px 8px;"></div>
+
+                        <div class="relative z-10 flex flex-col justify-start">
                             <div class="flex items-center space-x-1 sm:space-x-1.5 mb-1 sm:mb-2">
                                 <div class="w-3 sm:w-4 h-1.5 bg-green-500 skew-x-[15deg] shadow-[0_0_6px_#22c55e]"></div>
                                 <div class="w-3 sm:w-4 h-1.5 bg-green-500 skew-x-[15deg] shadow-[0_0_6px_#22c55e]"></div>
@@ -292,9 +398,14 @@
                                 <div class="w-3 sm:w-4 h-1.5 bg-red-600 skew-x-[15deg] animate-pulse shadow-[0_0_10px_#dc2626]"></div>
                                 <span class="ml-2 text-[8px] sm:text-[10px] font-mono-telemetry font-black text-slate-300 tracking-widest uppercase">RSP. DIDATA</span>
                             </div>
-                            
-                            <div class="flex items-baseline">
-                                <h3 id="pclSelectedNameTitle" class="text-5xl sm:text-6xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] font-mono-telemetry" style="line-height: 0.85;">0</h3>
+
+                            <div class="flex items-end gap-3">
+                                <div class="text-left">
+                                    <span id="pclSelectedValue" class="block text-4xl sm:text-6xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] font-mono-telemetry leading-none">0</span>
+                                </div>
+                                <div class="pb-1">
+                                    <span id="pclSelectedNameTitle" class="block text-[12px] sm:text-[18px] font-bold text-slate-300 tracking-tight leading-none">Nama</span>
+                                </div>
                             </div>
                         </div>
 
@@ -305,39 +416,49 @@
                                     <span id="pclPercentageValue" class="text-xs sm:text-sm font-black font-mono-telemetry text-amber-300">0%</span>
                                 </div>
                                 <div class="w-2.5 h-6 bg-amber-500/20 rounded-full overflow-hidden flex flex-col justify-end border border-amber-400/60">
-                                    <div id="pclPercentageBar" class="w-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" style="height: 0%;"></div>
+                                    <div id="pclPercentageBar" class="w-full bg-amber-400 shadow-[0_0_8px_#fbbf24]" style="height: 0%;"></div>
                                 </div>
                             </div>
+
                             <div class="bg-black/90 px-3.5 py-2 rounded-xl border border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.3)] text-center">
                                 <span class="block text-[8px] font-mono-telemetry tracking-widest text-cyan-400 uppercase font-black">+Didata</span>
-                                <span id="pclProgHarianValue" class="text-base sm:text-lg font-black font-mono-telemetry text-cyan-300">0</span>
+                                <span id="pclProgHarianValue" class="plus-data-ok text-base sm:text-lg font-black font-mono-telemetry">0</span>
                             </div>
+
                             <div class="bg-black/90 px-3.5 py-1.5 rounded-xl border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] text-right hidden sm:block">
-                                <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Sisa Target</span>
-                                <span id="pclSisaTargetValue" class="text-xl sm:text-2xl font-black font-mono-telemetry animate-blink text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.9)]">0</span>
+                                <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Target Prelist</span>
+                                <span id="pclSisaTargetValue" class="target-static text-xl sm:text-2xl font-black font-mono-telemetry">0</span>
                             </div>
                         </div>
                     </div>
 
+                    <div id="pclAlarmPanel" class="hidden">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                            <span class="text-[9px] font-black uppercase tracking-[0.22em] text-red-200">Alarm Darurat</span>
+                        </div>
+                        <button id="stopPclAlarmBtn" type="button">Matikan Alarm</button>
+                    </div>
+
+                    <div id="pclLowWarningBar" class="hidden">
+                        <div class="pcl-warning-text">kecepatan rendah, lepas kopling tancap gas Sobatku !!</div>
+                    </div>
+
                     <div class="sm:hidden bg-black/90 px-3.5 py-1.5 rounded-xl border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] text-center">
-                        <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Sisa Target</span>
-                        <span id="pclSisaTargetValueMobile" class="text-xl font-black font-mono-telemetry animate-blink text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.9)]">0</span>
+                        <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Target Prelist</span>
+                        <span id="pclSisaTargetValueMobile" class="target-static text-xl font-black font-mono-telemetry">0</span>
                     </div>
 
                     <div id="pclCockpitGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
                 </div>
             </div>
-
         </div>
-
     </main>
 
-    <!-- Footer -->
     <footer class="mt-12 py-6 text-center text-xs sm:text-sm font-bold text-amber-300 tracking-wider border-t border-orange-500/20 bg-slate-950/40 shadow-inner">
         Website by vanndawir • mentas siji mentas kabeh
     </footer>
 
-    <!-- JavaScript Interaktif -->
     <script>
         window.addEventListener('load', () => {
             setTimeout(() => {
@@ -352,6 +473,7 @@
         });
 
         const targetDate = new Date('2026-08-17T10:00:00').getTime();
+
         function updateCountdown() {
             const now = new Date().getTime();
             const distance = targetDate - now;
@@ -368,6 +490,7 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             timerEl.innerText = `${days} Hari ${hours} Jam ${minutes} Menit`;
         }
+
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
@@ -379,7 +502,9 @@
                 val = String(val);
             }
             if (!val) return 0;
+
             let str = String(val).trim();
+
             if (str.includes('.') && str.includes(',')) {
                 str = str.replace(/\./g, '').replace(',', '.');
             } else if (str.indexOf('.') !== -1) {
@@ -393,26 +518,27 @@
                     str = str.replace(',', '.');
                 }
             }
+
             return parseFloat(str) || 0;
         }
 
         function getFilteredCells(rawCells) {
             if (!rawCells || !Array.isArray(rawCells)) return [];
-            return rawCells.slice(-8);
-        }
-
-        function getPmlFilteredCells(rawCells) {
-            if (!rawCells || !Array.isArray(rawCells)) return [];
-            let cells = rawCells.slice(-8);
+            const cells = rawCells.slice(-8);
             return cells.filter(cell => {
                 const h = (cell.header || '').toLowerCase();
-                const isJumlahDidataDraft = (h.includes('jumlah') && h.includes('didata') && h.includes('draft')) || h.includes('didata + draft') || h.includes('didata+draft');
+                const isJumlahDidataDraft =
+                    (h.includes('jumlah') && h.includes('didata') && h.includes('draft')) ||
+                    h.includes('didata + draft') ||
+                    h.includes('didata+draft');
+
                 return !isJumlahDidataDraft;
             });
         }
 
         const pmlSelect = document.getElementById('pmlSelect');
         const pmlTitle = document.getElementById('pmlSelectedNameTitle');
+        const pmlValue = document.getElementById('pmlSelectedValue');
         const pmlSisa = document.getElementById('pmlSisaTargetValue');
         const pmlSisaMob = document.getElementById('pmlSisaTargetValueMobile');
         const pmlPctVal = document.getElementById('pmlPercentageValue');
@@ -423,6 +549,7 @@
 
         const pclSelect = document.getElementById('pclSelect');
         const pclTitle = document.getElementById('pclSelectedNameTitle');
+        const pclValue = document.getElementById('pclSelectedValue');
         const pclPctVal = document.getElementById('pclPercentageValue');
         const pclPctBar = document.getElementById('pclPercentageBar');
         const pclProgHarianVal = document.getElementById('pclProgHarianValue');
@@ -431,78 +558,238 @@
         const pclGrid = document.getElementById('pclCockpitGrid');
         const pclPlace = document.getElementById('pclPlaceholder');
         const pclCont = document.getElementById('pclContentContainer');
+        const pclAlarmPanel = document.getElementById('pclAlarmPanel');
+        const pclLowWarningBar = document.getElementById('pclLowWarningBar');
+        const stopPclAlarmBtn = document.getElementById('stopPclAlarmBtn');
 
-        if (pmlSelect) {
-            pmlSelect.addEventListener('change', () => {
-                const val = pmlSelect.value;
-                if (val === "") {
-                    pmlPlace.classList.remove('hidden');
-                    pmlCont.classList.add('hidden');
-                    return;
+        let emergencyAudioCtx = null;
+        let emergencyOscillators = [];
+        let emergencyAlarmTimer = null;
+
+        function showPclWarning() {
+            if (pclLowWarningBar) {
+                pclLowWarningBar.classList.remove('hidden');
+            }
+        }
+
+        function hidePclWarning() {
+            if (pclLowWarningBar) {
+                pclLowWarningBar.classList.add('hidden');
+            }
+        }
+
+        function startEmergencyAlarm() {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+
+            if (!emergencyAudioCtx) {
+                emergencyAudioCtx = new AudioCtx();
+            }
+
+            if (emergencyAudioCtx.state === 'suspended') {
+                emergencyAudioCtx.resume();
+            }
+
+            if (emergencyOscillators.length > 0) return;
+
+            const masterGain = emergencyAudioCtx.createGain();
+            masterGain.gain.value = 0.14;
+
+            const oscA = emergencyAudioCtx.createOscillator();
+            oscA.type = 'sawtooth';
+            oscA.frequency.value = 950;
+
+            const oscB = emergencyAudioCtx.createOscillator();
+            oscB.type = 'square';
+            oscB.frequency.value = 1450;
+
+            const lfo = emergencyAudioCtx.createOscillator();
+            lfo.type = 'sine';
+            lfo.frequency.value = 9;
+
+            const lfoGain = emergencyAudioCtx.createGain();
+            lfoGain.gain.value = 340;
+
+            lfo.connect(lfoGain);
+            lfoGain.connect(oscA.frequency);
+            lfoGain.connect(oscB.frequency);
+
+            oscA.connect(masterGain);
+            oscB.connect(masterGain);
+            masterGain.connect(emergencyAudioCtx.destination);
+
+            oscA.start();
+            oscB.start();
+            lfo.start();
+
+            emergencyOscillators = [oscA, oscB, lfo];
+
+            if (emergencyAlarmTimer) clearInterval(emergencyAlarmTimer);
+
+            let direction = 1;
+            let current = 950;
+
+            emergencyAlarmTimer = setInterval(() => {
+                if (!emergencyOscillators.length) return;
+
+                current += direction * 140;
+
+                if (current >= 1500 || current <= 700) {
+                    direction *= -1;
+                    current = Math.max(700, Math.min(1500, current));
                 }
 
-                if (pclSelect) pclSelect.value = "";
-                if (pclPlace) pclPlace.classList.add('hidden');
-                if (pclCont) pclCont.classList.add('hidden');
+                oscA.frequency.setTargetAtTime(current, emergencyAudioCtx.currentTime, 0.06);
+                oscB.frequency.setTargetAtTime(current * 1.55, emergencyAudioCtx.currentTime, 0.06);
+            }, 80);
+        }
 
-                const item = detailedPmlData[parseInt(val, 10)];
+        function stopEmergencyAlarm() {
+            if (emergencyAlarmTimer) {
+                clearInterval(emergencyAlarmTimer);
+                emergencyAlarmTimer = null;
+            }
+
+            emergencyOscillators.forEach((osc) => {
+                try { osc.stop(); } catch (e) {}
+            });
+            emergencyOscillators = [];
+
+            if (emergencyAudioCtx) {
+                try { emergencyAudioCtx.close(); } catch (e) {}
+                emergencyAudioCtx = null;
+            }
+        }
+
+        function showPclAlarm() {
+            if (pclAlarmPanel) pclAlarmPanel.classList.add('active');
+        }
+
+        function hidePclAlarm() {
+            if (pclAlarmPanel) pclAlarmPanel.classList.remove('active');
+        }
+
+        function applyPclStatusByProgress(progressPercent, plusDidata) {
+            if (!pclPctVal || !pclPctBar || !pclProgHarianVal) return;
+
+            const plus = Number(plusDidata) || 0;
+            const progress = Number(progressPercent) || 0;
+
+            pclPctVal.classList.remove('status-positive', 'status-negative', 'pcl-progress-default');
+            pclPctBar.classList.remove('status-positive-bar', 'status-negative-bar', 'pcl-progress-bar');
+            pclProgHarianVal.classList.remove('plus-data-ok', 'plus-data-low', 'plus-data-static');
+
+            pclPctVal.classList.add('pcl-progress-default');
+            pclPctBar.classList.add('pcl-progress-bar');
+
+            if (progress >= 100) {
+                pclProgHarianVal.classList.add('plus-data-ok');
+                hidePclWarning();
+                hidePclAlarm();
+                stopEmergencyAlarm();
+                return;
+            }
+
+            if (plus >= 10) {
+                pclProgHarianVal.classList.add('plus-data-ok');
+                hidePclWarning();
+                hidePclAlarm();
+                stopEmergencyAlarm();
+                return;
+            }
+
+            pclProgHarianVal.classList.add('plus-data-low');
+            showPclWarning();
+            showPclAlarm();
+            startEmergencyAlarm();
+        }
+
+        if (stopPclAlarmBtn) {
+            stopPclAlarmBtn.addEventListener('click', () => {
+                hidePclAlarm();
+                stopEmergencyAlarm();
+
+                if (pclProgHarianVal) {
+                    pclProgHarianVal.classList.remove('plus-data-ok');
+                    pclProgHarianVal.classList.add('plus-data-low');
+                }
+
+                if (pclPctVal && pclPctBar) {
+                    pclPctVal.classList.remove('pcl-progress-default');
+                    pclPctVal.classList.add('pcl-progress-default');
+                    pclPctBar.classList.remove('pcl-progress-bar');
+                    pclPctBar.classList.add('pcl-progress-bar');
+                }
+
+                showPclWarning();
+            });
+        }
+
+        function closePclCard() {
+            if (pclSelect) pclSelect.value = '';
+            if (pclPlace) pclPlace.classList.remove('hidden');
+            if (pclCont) pclCont.classList.add('hidden');
+            hidePclAlarm();
+            hidePclWarning();
+            stopEmergencyAlarm();
+        }
+
+        function closePmlCard() {
+            if (pmlSelect) pmlSelect.value = '';
+            if (pmlPlace) pmlPlace.classList.remove('hidden');
+            if (pmlCont) pmlCont.classList.add('hidden');
+        }
+
+        if (pmlSelect) {
+            const renderPmlCard = (index) => {
+                const item = detailedPmlData[index];
                 if (!item) return;
 
                 pmlPlace.classList.add('hidden');
                 pmlCont.classList.remove('hidden');
 
-                let gridHtml = '';
-                let didataVal = 0;
-                let targetVal = 0;
+                closePclCard();
+
+                let didataVal = parseNum(item.didata ?? item.respondenDidata ?? 0);
+                let targetPrelistVal = parseNum(item.targetPrelist ?? item.target ?? 0);
 
                 if (item.rawCells && Array.isArray(item.rawCells)) {
-                    item.rawCells.forEach(cell => {
+                    item.rawCells.forEach((cell) => {
                         const hLower = (cell.header || '').toLowerCase();
                         const cValNum = parseNum(cell.value);
 
-                        if ((hLower.includes('total usaha keluarga') || hLower.includes('usaha keluarga')) && !hLower.includes('target') && !hLower.includes('prelist')) {
-                            if (cValNum > didataVal) didataVal = cValNum;
-                        } else if (didataVal === 0 && (hLower.includes('didata') || hLower.includes('realisasi')) && !hLower.includes('target') && !hLower.includes('prelist')) {
-                            didataVal = cValNum;
+                        if (
+                            (hLower.includes('didata') || hLower.includes('realisasi')) &&
+                            !hLower.includes('target') &&
+                            !hLower.includes('prelist') &&
+                            !hLower.includes('draft') &&
+                            !hLower.includes('+didata')
+                        ) {
+                            if (didataVal === 0) didataVal = cValNum;
                         }
 
-                        if ((hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) && !hLower.includes('prelist') && !hLower.includes('pre-list')) {
-                            targetVal = cValNum;
+                        if (
+                            (hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) &&
+                            (hLower.includes('prelist') || hLower.includes('pre-list') || hLower.includes('awal'))
+                        ) {
+                            targetPrelistVal = cValNum;
                         }
                     });
+                }
 
-                    if (didataVal === 0) {
-                        item.rawCells.forEach(cell => {
-                            const hLower = (cell.header || '').toLowerCase();
-                            const cValNum = parseNum(cell.value);
-                            if (!hLower.includes('target') && !hLower.includes('prelist') && cValNum > didataVal) {
-                                didataVal = cValNum;
-                            }
-                        });
-                    }
-
-                    if (targetVal === 0) {
-                        item.rawCells.forEach(cell => {
-                            const hLower = (cell.header || '').toLowerCase();
-                            const cValNum = parseNum(cell.value);
-                            if (hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) {
-                                targetVal = cValNum;
-                            }
-                        });
-                    }
-
-                    let cells = getPmlFilteredCells(item.rawCells);
-                    cells.sort((a, b) => {
+                let gridHtml = '';
+                if (item.rawCells && Array.isArray(item.rawCells)) {
+                    const cells = getFilteredCells(item.rawCells).sort((a, b) => {
                         const ha = (a.header || '').toLowerCase();
                         const hb = (b.header || '').toLowerCase();
                         if (ha.includes('target') && !ha.includes('prelist')) return -1;
-                        if (hb.includes('target') && !hb.includes('prelist')) return 1;
+                        if (hb.includes('target') && !ha.includes('prelist')) return 1;
                         if (ha.includes('didata') || ha.includes('usaha')) return -1;
                         if (hb.includes('didata') || hb.includes('usaha')) return 1;
                         return ha.localeCompare(hb);
                     });
 
-                    cells.forEach(cell => {
+                    cells.forEach((cell) => {
                         const header = cell.header || 'Label';
                         const cVal = cell.value || 0;
                         gridHtml += `
@@ -514,83 +801,79 @@
                     });
                 }
 
-                pmlTitle.innerText = didataVal.toLocaleString('id-ID');
-                const pmlPct = targetVal > 0 ? (didataVal / targetVal) * 100 : 0;
-                pmlPctVal.innerText = pmlPct.toFixed(1) + '%';
-                pmlPctBar.style.height = Math.min(Math.max(pmlPct, 0), 100) + '%';
+                pmlTitle.innerText = item.name || '—';
+                pmlValue.innerText = didataVal.toLocaleString('id-ID');
 
-                const pmlSisaTarget = Math.max(targetVal - didataVal, 0);
-                pmlSisa.innerText = pmlSisaTarget.toLocaleString('id-ID');
-                if (pmlSisaMob) pmlSisaMob.innerText = pmlSisaTarget.toLocaleString('id-ID');
+                const pmlPct = targetPrelistVal > 0 ? (didataVal / targetPrelistVal) * 100 : 0;
+                pmlPctVal.innerText = `${pmlPct.toFixed(1)}%`;
+                pmlPctBar.style.height = `${Math.min(Math.max(pmlPct, 0), 100)}%`;
+
+                const pmlTargetPrelist = Math.max(targetPrelistVal, 0);
+                pmlSisa.innerText = pmlTargetPrelist.toLocaleString('id-ID');
+                if (pmlSisaMob) pmlSisaMob.innerText = pmlTargetPrelist.toLocaleString('id-ID');
+
+                pmlSisa.classList.add('target-static');
+                if (pmlSisaMob) pmlSisaMob.classList.add('target-static');
 
                 pmlGrid.innerHTML = gridHtml || '<div class="col-span-full text-center text-xs text-slate-500 italic">Tidak ada rincian data</div>';
+            };
+
+            pmlSelect.addEventListener('change', () => {
+                const val = pmlSelect.value;
+                if (val === '') {
+                    pmlPlace.classList.remove('hidden');
+                    pmlCont.classList.add('hidden');
+                    return;
+                }
+                renderPmlCard(parseInt(val, 10));
             });
+
+            if (pmlSelect.options.length > 1) {
+                pmlSelect.value = pmlSelect.options[1].value;
+                renderPmlCard(parseInt(pmlSelect.value, 10));
+            }
         }
 
         if (pclSelect) {
-            pclSelect.addEventListener('change', () => {
-                const val = pclSelect.value;
-                if (val === "") {
-                    pclPlace.classList.remove('hidden');
-                    pclCont.classList.add('hidden');
-                    return;
-                }
-
-                if (pmlSelect) pmlSelect.value = "";
-                if (pmlPlace) pmlPlace.classList.add('hidden');
-                if (pmlCont) pmlCont.classList.add('hidden');
-
-                const item = detailedPclData[parseInt(val, 10)];
+            const renderPclCard = (index) => {
+                const item = detailedPclData[index];
                 if (!item) return;
 
                 pclPlace.classList.add('hidden');
                 pclCont.classList.remove('hidden');
 
-                let gridHtml = '';
-                let didataVal = 0;
-                let targetVal = 0;
-                let progHarianVal = 0;
+                closePmlCard();
+
+                let didataVal = parseNum(item.didata ?? item.respondenDidata ?? 0);
+                let targetPrelistVal = parseNum(item.targetPrelist ?? item.target ?? 0);
 
                 if (item.rawCells && Array.isArray(item.rawCells)) {
-                    item.rawCells.forEach(cell => {
+                    item.rawCells.forEach((cell) => {
                         const hLower = (cell.header || '').toLowerCase();
                         const cValNum = parseNum(cell.value);
 
-                        if (hLower.includes('+didata') || hLower.includes('+ didata')) {
-                            progHarianVal = cValNum;
-                        } else if ((hLower.includes('total usaha keluarga') || hLower.includes('usaha keluarga')) && !hLower.includes('target') && !hLower.includes('prelist')) {
-                            if (cValNum > didataVal) didataVal = cValNum;
-                        } else if (didataVal === 0 && (hLower.includes('didata') || hLower.includes('realisasi')) && !hLower.includes('target') && !hLower.includes('prelist') && !hLower.includes('draft')) {
-                            didataVal = cValNum;
+                        if (
+                            (hLower.includes('didata') || hLower.includes('realisasi')) &&
+                            !hLower.includes('target') &&
+                            !hLower.includes('prelist') &&
+                            !hLower.includes('draft') &&
+                            !hLower.includes('+didata')
+                        ) {
+                            if (didataVal === 0) didataVal = cValNum;
                         }
 
-                        if ((hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) && !hLower.includes('prelist') && !hLower.includes('pre-list')) {
-                            targetVal = cValNum;
+                        if (
+                            (hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) &&
+                            (hLower.includes('prelist') || hLower.includes('pre-list') || hLower.includes('awal'))
+                        ) {
+                            targetPrelistVal = cValNum;
                         }
                     });
+                }
 
-                    if (didataVal === 0) {
-                        item.rawCells.forEach(cell => {
-                            const hLower = (cell.header || '').toLowerCase();
-                            const cValNum = parseNum(cell.value);
-                            if (!hLower.includes('target') && !hLower.includes('prelist') && !hLower.includes('draft') && !hLower.includes('+didata') && cValNum > didataVal) {
-                                didataVal = cValNum;
-                            }
-                        });
-                    }
-
-                    if (targetVal === 0) {
-                        item.rawCells.forEach(cell => {
-                            const hLower = (cell.header || '').toLowerCase();
-                            const cValNum = parseNum(cell.value);
-                            if (hLower.includes('target') || hLower.includes('beban') || hLower.includes('sasaran')) {
-                                targetVal = cValNum;
-                            }
-                        });
-                    }
-
-                    let cells = getPmlFilteredCells(item.rawCells);
-                    cells.sort((a, b) => {
+                let gridHtml = '';
+                if (item.rawCells && Array.isArray(item.rawCells)) {
+                    const cells = getFilteredCells(item.rawCells).sort((a, b) => {
                         const ha = (a.header || '').toLowerCase();
                         const hb = (b.header || '').toLowerCase();
                         if (ha.includes('target') && !ha.includes('prelist')) return -1;
@@ -600,11 +883,11 @@
                         return ha.localeCompare(hb);
                     });
 
-                    cells.forEach(cell => {
+                    cells.forEach((cell) => {
                         const header = cell.header || 'Label';
                         const cVal = cell.value || 0;
                         gridHtml += `
-                          <div class="bg-black/90 p-3 rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 shadow"> 
+                            <div class="bg-black/90 p-3 rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 shadow">
                                 <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${header}</span>
                                 <span class="text-xs sm:text-sm font-black font-mono-telemetry text-white">${typeof cVal === 'number' ? cVal.toLocaleString('id-ID') : cVal}</span>
                             </div>
@@ -612,18 +895,44 @@
                     });
                 }
 
-                pclTitle.innerText = didataVal.toLocaleString('id-ID');
-                const pclPct = targetVal > 0 ? (didataVal / targetVal) * 100 : 0;
-                pclPctVal.innerText = pclPct.toFixed(1) + '%';
-                pclPctBar.style.height = Math.min(Math.max(pclPct, 0), 100) + '%';
+                pclTitle.innerText = item.name || '—';
+                pclValue.innerText = didataVal.toLocaleString('id-ID');
 
-                if (pclProgHarianVal) pclProgHarianVal.innerText = progHarianVal.toLocaleString('id-ID');
+                const pclPct = targetPrelistVal > 0 ? (didataVal / targetPrelistVal) * 100 : 0;
+                const pclPctRounded = Number(pclPct.toFixed(1));
+                const plusDidataValue = parseNum(item.harian ?? item.plusDidata ?? 0);
 
-                const pclSisaTarget = Math.max(targetVal - didataVal, 0);
-                pclSisa.innerText = pclSisaTarget.toLocaleString('id-ID');
-                if (pclSisaMob) pclSisaMob.innerText = pclSisaTarget.toLocaleString('id-ID');
+                pclPctVal.innerText = `${pclPctRounded}%`;
+                pclPctBar.style.height = `${Math.min(Math.max(pclPctRounded, 0), 100)}%`;
+
+                const pclTargetPrelist = Math.max(targetPrelistVal, 0);
+                pclSisa.innerText = pclTargetPrelist.toLocaleString('id-ID');
+                if (pclSisaMob) pclSisaMob.innerText = pclTargetPrelist.toLocaleString('id-ID');
+
+                pclSisa.classList.add('target-static');
+                if (pclSisaMob) pclSisaMob.classList.add('target-static');
+
+                if (pclProgHarianVal) {
+                    pclProgHarianVal.innerText = plusDidataValue.toLocaleString('id-ID');
+                }
+
+                applyPclStatusByProgress(pclPctRounded, plusDidataValue);
 
                 pclGrid.innerHTML = gridHtml || '<div class="col-span-full text-center text-xs text-slate-500 italic">Tidak ada rincian data</div>';
+            };
+
+            pclSelect.addEventListener('change', () => {
+                const val = pclSelect.value;
+                if (val === '') {
+                    pclPlace.classList.remove('hidden');
+                    pclCont.classList.add('hidden');
+                    hidePclAlarm();
+                    hidePclWarning();
+                    stopEmergencyAlarm();
+                    return;
+                }
+
+                renderPclCard(parseInt(val, 10));
             });
         }
     </script>
