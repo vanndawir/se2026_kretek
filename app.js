@@ -48,25 +48,22 @@ const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
         if (rows[i] && rows[i].length > maxCols) maxCols = rows[i].length;
     }
 
-    const scan = (keywords) => {
-        for (let kw of keywords) {
-            let cleanKw = kw.toLowerCase().replace(/[^a-z0-9+]/g, '');
-            for (let col = 0; col < maxCols; col++) {
-                let colText = '';
-                for (let row = 0; row < maxRowsToScan; row++) {
-                    if (rows[row] && rows[row][col] !== undefined) {
-                        colText += String(rows[row][col]).toLowerCase().replace(/[^a-z0-9+]/g, '');
-                    }
-                }
-                if (colText.includes(cleanKw)) return col;
-            }
-        }
-        return -1;
-    };
+    const allKeywords = [...exactKeywords, ...partialKeywords].sort((a, b) => b.length - a.length);
 
-    let idx = scan(exactKeywords);
-    if (idx === -1) idx = scan(partialKeywords);
-    return idx;
+    for (let kw of allKeywords) {
+        let cleanKw = kw.toLowerCase().replace(/[^a-z0-9+]/g, '');
+        if (!cleanKw) continue;
+        for (let col = 0; col < maxCols; col++) {
+            let colText = '';
+            for (let row = 0; row < maxRowsToScan; row++) {
+                if (rows[row] && rows[row][col] !== undefined) {
+                    colText += String(rows[row][col]).toLowerCase().replace(/[^a-z0-9+]/g, '');
+                }
+            }
+            if (colText.includes(cleanKw)) return col;
+        }
+    }
+    return -1;
 };
 
 // Pencari Nama Petugas yang Akurat
@@ -161,11 +158,17 @@ const parsePetugas = (rows, role) => {
     let dataStartIdx = rows.findIndex((r, idx) => idx > 1 && r && (r[0] === 1 || String(r[0]).trim() === '1'));
     if (dataStartIdx === -1) dataStartIdx = 3;
 
-    // Pemetaan posisi kolom mutlak sesuai file Excel rekap_petugas
-    let targetIdx = 5; // Kolom F (Target Prelist)
-    let didataIdx = 6; // Kolom G (Responden Didata)
-    let harianIdx = 7; // Kolom H (+ Didata)
-    let pctIdx = 8;    // Kolom I (% Didata)
+    let targetIdx = getBulletproofColIndex(rows, ['target', 'prelist'], ['beban']);
+    let didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi'], ['didata']);
+    let harianIdx = getBulletproofColIndex(rows, ['+didata', 'harian'], ['+']);
+    let pctIdx = getBulletproofColIndex(rows, ['%didata', 'persentasedidata'], ['%']);
+    let didataDraftIdx = getBulletproofColIndex(rows, ['didatadraft', 'didata+draft'], ['draft']);
+
+    if (targetIdx === -1) targetIdx = 5;
+    if (didataIdx === -1) didataIdx = 6;
+    if (harianIdx === -1) harianIdx = 7;
+    if (pctIdx === -1) pctIdx = 8;
+    if (didataDraftIdx === -1) didataDraftIdx = 9;
 
     let compositeHeaders = [];
     let maxCols = 0;
@@ -174,18 +177,19 @@ const parsePetugas = (rows, role) => {
     }
 
     for (let c = 0; c < maxCols; c++) {
-        let label = '';
+        let parts = [];
         for (let r = 0; r < dataStartIdx; r++) {
             if (rows[r] && rows[r][c] !== undefined && rows[r][c] !== null) {
-                let txt = String(rows[r][c]).trim();
-                if (txt && !label.includes(txt)) label += (label ? ' ' : '') + txt;
+                let txt = String(rows[r][c]).trim().replace(/[\r\n]+/g, ' ');
+                if (txt && !parts.includes(txt)) parts.push(txt);
             }
         }
-        if (c === targetIdx) label = 'Target Prelist';
-        if (c === didataIdx) label = 'Responden Didata';
-        if (c === harianIdx) label = '+ Didata';
-        if (c === pctIdx) label = '% Didata';
-        compositeHeaders[c] = label || `Kolom_${c}`;
+        if (c === targetIdx) compositeHeaders[c] = 'Target Prelist';
+        else if (c === didataIdx) compositeHeaders[c] = 'Responden Didata';
+        else if (c === harianIdx) compositeHeaders[c] = '+ Didata';
+        else if (c === pctIdx) compositeHeaders[c] = '% Didata';
+        else if (c === didataDraftIdx) compositeHeaders[c] = 'Didata + Draft';
+        else compositeHeaders[c] = parts.join(' ') || `Kolom_${c}`;
     }
 
     return rows.slice(dataStartIdx).map(r => {
@@ -195,33 +199,55 @@ const parsePetugas = (rows, role) => {
         let targetVal = parseStrictNumber(r[targetIdx]);
         let didataVal = parseStrictNumber(r[didataIdx]);
         let harianVal = parseStrictNumber(r[harianIdx]);
+        let didataDraftVal = parseStrictNumber(r[didataDraftIdx]);
+        if (didataDraftVal < didataVal) didataDraftVal = didataVal;
 
-        // Perhitungan Sisa Target Murni: Target Prelist - Responden Didata
-        let sisaTargetVal = Math.max(0, targetVal - didataVal);
-
-        // Perhitungan / Pengambilan Persentase
+        // Membaca % Didata langsung dari Excel
         let rawPct = r[pctIdx];
         let formattedPct = '0.0%';
         let numericPct = 0;
 
         if (rawPct !== undefined && rawPct !== null && rawPct !== '' && rawPct !== '-') {
-            let strPct = String(rawPct).trim();
-            if (!strPct.includes('%')) {
-                let num = parseFloat(strPct.replace(',', '.'));
-                if (!isNaN(num)) {
-                    numericPct = num <= 1 ? num * 100 : num;
-                    formattedPct = numericPct.toFixed(1) + '%';
-                }
-            } else {
-                formattedPct = strPct;
-                numericPct = parseFloat(strPct.replace('%', '').trim()) || 0;
+            let strPct = String(rawPct).trim().replace('%', '');
+            let num = parseFloat(strPct.replace(',', '.'));
+            if (!isNaN(num)) {
+                numericPct = num <= 1 ? num * 100 : num;
+                if (numericPct > 100) numericPct = 100;
+                formattedPct = numericPct.toFixed(1) + '%';
             }
         } else if (targetVal > 0) {
-            numericPct = (didataVal / targetVal) * 100;
+            numericPct = Math.min(100, (didataVal / targetVal) * 100);
             formattedPct = numericPct.toFixed(1) + '%';
         }
 
-        // KUMPULAN KUNCI LENGKAP (Kompatibel dengan semua template EJS)
+        // ========================================================
+        // BACA MUTLAK KOLOM K (INDEX 10) UNTUK % DIDATA + DRAFT
+        // Tanpa tebakan AI, hanya merubah desimal excel menjadi %
+        // ========================================================
+        let rawPctDraft = r[10]; // Pastikan mengunci ke Kolom K
+        let formattedPctDraft = '0.0%';
+        let numericPctDraft = 0;
+
+        if (rawPctDraft !== undefined && rawPctDraft !== null && rawPctDraft !== '' && rawPctDraft !== '-') {
+            let strVal = String(rawPctDraft).trim();
+            let num = parseFloat(strVal.replace('%', '').replace(',', '.'));
+            
+            if (!isNaN(num)) {
+                // Di Excel, jika sebuah sel berformat '%', nilai mentahnya disimpan sebagai desimal (misal 107.04% = 1.0704)
+                // Kita kembalikan desimal itu menjadi angka persen yang normal.
+                if (typeof rawPctDraft === 'number' && !strVal.includes('%')) {
+                    numericPctDraft = num * 100;
+                } else {
+                    // Jika teks sudah memiliki simbol '%' dari sananya atau diketik sebagai string teks murni
+                    numericPctDraft = num;
+                }
+                formattedPctDraft = numericPctDraft.toFixed(1) + '%';
+            } else {
+                formattedPctDraft = strVal; // Jika aneh, tampilkan teks apa adanya
+            }
+        }
+        // ========================================================
+
         let rowObj = { 
             name, 
             target: targetVal, 
@@ -233,16 +259,20 @@ const parsePetugas = (rows, role) => {
             progress: formattedPct,
             progressVal: numericPct,
             persentase: formattedPct,
-            persentaseDidataDraft: formattedPct,
-            'Target Prelist Awal dari spreadsheet index ke-5': targetVal,   // Target Prelist Awal dari spreadsheet index ke-5
-            'Target Prelist Awal pada kolom index ke-5 (kolom F)': targetVal,   // Target Prelist Awal pada kolom index ke-5 (kolom F)
+            didataDraft: didataDraftVal,
+            progressDraft: formattedPctDraft,
+            progressDraftVal: numericPctDraft,
+            persentaseDidataDraft: formattedPctDraft,
+            persentaseDidataDraftVal: numericPctDraft,
+            'Target Prelist Awal dari spreadsheet index ke-5': targetVal,
+            'Target Prelist Awal pada kolom index ke-5 (kolom F)': targetVal,
             rawCells: []
         };
         
-        let rowCols = Math.max(compositeHeaders.length, r.length);
-        for (let idx = 0; idx < rowCols; idx++) {
+        for (let idx = 11; idx <= 16; idx++) {
             let h = compositeHeaders[idx] || `Kolom_${idx}`;
-            let val = r[idx] !== undefined ? r[idx] : '-';
+            let rawVal = (idx < r.length && r[idx] !== undefined && r[idx] !== null) ? r[idx] : '-';
+            let val = (rawVal !== '-' && !isNaN(rawVal)) ? parseStrictNumber(rawVal) : rawVal;
             rowObj.rawCells.push({ header: h, value: val });
         }
 
