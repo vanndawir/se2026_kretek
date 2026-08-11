@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { google } = require('googleapis');
 const xlsx = require('xlsx');
@@ -11,8 +12,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Inisialisasi Gemini AI (Menggunakan API Key Anda)
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || });
+// Inisialisasi Gemini AI
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
@@ -281,6 +282,9 @@ const parsePetugas = (rows, role) => {
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
 
+// Simpan referensi timer AI per socket
+const activeAiTimers = {};
+
 io.on('connection', (socket) => {
     db.all(`SELECT * FROM (SELECT * FROM chats ORDER BY id DESC LIMIT 50) ORDER BY id ASC`, [], (err, rows) => {
         if (!err) {
@@ -291,55 +295,79 @@ io.on('connection', (socket) => {
     });
 
     socket.on('send_message', (data) => {
-        const sender = data.sender || 'Petugas Anonim';
+        const sender = (data.name && data.name.trim() !== '') ? data.name : 'Petugas Anonim';
         const message = data.message;
         const senderType = data.sender_type || 'user'; 
-        const timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        const timestamp = data.timestamp || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
         db.run(`INSERT INTO chats (name, message, sender_type, timestamp) VALUES (?, ?, ?, ?)`, [sender, message, senderType, timestamp], function(err) {
-            if (!err) {
-                const messageData = {
-                    id: this.lastID,
-                    name: sender,
-                    message,
-                    sender_type: senderType,
-                    timestamp
-                };
-                io.emit('new_message', messageData);
+            if (err) {
+                console.error('❌ Gagal menyimpan chat ke database:', err.message);
+                return;
+            }
 
-                if (senderType === 'user') {
-                    setTimeout(async () => {
-                        try {
-                            const response = await ai.models.generateContent({
-                                model: 'gemini-2.5-flash',
-                                contents: `Kamu adalah asisten virtual yang ramah, empatik, dan suportif untuk para petugas lapangan Sensus Ekonomi 2026 (SE2026) di Kapanewon Kretek, Bantul. Petugas menyampaikan kendala: "${message}". Berikan tanggapan yang menyemangati, solutif secara umum, dan gunakan bahasa Indonesia yang santai namun profesional.`
-                            });
+            const messageData = {
+                id: this.lastID,
+                name: sender,
+                message,
+                sender_type: senderType,
+                timestamp
+            };
+            io.emit('new_message', messageData);
 
-                            const aiReplyText = response.text || "Tetap semangat rekan data! Admin utama akan segera meninjau laporanmu.";
-                            const aiTimestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            // CEK APAKAH ADMIN
+            const isAdmin = senderType === 'admin' || sender.includes('3402030') || message.includes('3402030');
 
-                            db.run(
-                                `INSERT INTO chats (name, message, sender_type, timestamp) VALUES (?, ?, ?, ?)`,
-                                ['Asisten AI Kretek 🤖', aiReplyText, 'ai', aiTimestamp],
-                                function (aiErr) {
-                                    if (!aiErr) {
-                                        io.emit('new_message', {
-                                            id: this.lastID,
-                                            name: 'Asisten AI Kretek 🤖',
-                                            message: aiReplyText,
-                                            sender_type: 'ai',
-                                            timestamp: aiTimestamp
-                                        });
-                                    }
-                                }
-                            );
-                        } catch (aiError) {
-                            console.error("Gagal memproses Auto-Reply AI:", aiError);
-                        }
-                    }, 2000);
+            if (isAdmin) {
+                if (activeAiTimers[socket.id]) {
+                    clearTimeout(activeAiTimers[socket.id]);
+                    delete activeAiTimers[socket.id];
                 }
+            } else {
+                if (activeAiTimers[socket.id]) {
+                    clearTimeout(activeAiTimers[socket.id]);
+                }
+
+                activeAiTimers[socket.id] = setTimeout(async () => {
+                    try {
+                        const response = await ai.models.generateContent({
+                            model: 'gemini-2.5-flash',
+                            contents: `Kamu adalah asisten virtual yang ramah, empatik, dan suportif untuk para petugas lapangan Sensus Ekonomi 2026 (SE2026) di Kapanewon Kretek, Bantul. Petugas menyampaikan kendala: "${message}". Berikan tanggapan yang menyemangati, solutif secara umum, dan gunakan bahasa Indonesia yang santai namun profesional.`
+                        });
+
+                        const aiReplyText = response.text || "Tetap semangat rekan data! Admin utama akan segera meninjau laporanmu.";
+                        const aiTimestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+                        db.run(
+                            `INSERT INTO chats (name, message, sender_type, timestamp) VALUES (?, ?, ?, ?)`,
+                            ['Asisten AI Kretek 🤖', aiReplyText, 'ai', aiTimestamp],
+                            function (aiErr) {
+                                if (!aiErr) {
+                                    io.emit('new_message', {
+                                        id: this.lastID,
+                                        name: 'Asisten AI Kretek 🤖',
+                                        message: aiReplyText,
+                                        sender_type: 'ai',
+                                        timestamp: aiTimestamp
+                                    });
+                                }
+                            }
+                        );
+                    } catch (aiError) {
+                        console.error("Gagal memproses Auto-Reply AI:", aiError);
+                    } finally {
+                        delete activeAiTimers[socket.id];
+                    }
+                }, 5 * 60 * 1000);
             }
         });
+    });
+
+    socket.on('disconnect', () => {
+        if (activeAiTimers[socket.id]) {
+            clearTimeout(activeAiTimers[socket.id]);
+            delete activeAiTimers[socket.id];
+        }
     });
 });
 
@@ -392,9 +420,14 @@ app.get('/', async (req, res) => {
         }
     } catch (err) {}
 
-    res.render('index', {
-        activeDate, persentaseKretek, totalTargetKretek, totalDidataKretek,
-        topPcl, bottomPcl, parsedDesa, detailedPml, detailedPcl
+    db.all(`SELECT * FROM chats ORDER BY id ASC`, [], (err, chatRows) => {
+        if (err) chatRows = [];
+
+        res.render('index', {
+            activeDate, persentaseKretek, totalTargetKretek, totalDidataKretek,
+            topPcl, bottomPcl, parsedDesa, detailedPml, detailedPcl,
+            chats: chatRows
+        });
     });
 });
 
