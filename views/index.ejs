@@ -344,6 +344,16 @@
                                 </div>
                             </div>
 
+                            <div class="bg-black/90 px-3 py-2 rounded-xl border border-sky-500/50 shadow-[0_0_12px_rgba(56,189,248,0.3)] text-center flex items-center space-x-2">
+                                <div class="text-right">
+                                    <span class="block text-[8px] font-mono-telemetry tracking-widest text-sky-400 uppercase font-black">% +Draft</span>
+                                    <span id="pmlDraftPercentageValue" class="text-xs sm:text-sm font-black font-mono-telemetry text-sky-300">0%</span>
+                                </div>
+                                <div class="w-2.5 h-6 bg-sky-500/20 rounded-full overflow-hidden flex flex-col justify-end border border-sky-400/60">
+                                    <div id="pmlDraftPercentageBar" class="w-full bg-sky-400 shadow-[0_0_8px_#38bdf8]" style="height: 0%;"></div>
+                                </div>
+                            </div>
+
                             <div class="bg-black/90 px-3.5 py-1.5 rounded-xl border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] text-right hidden sm:block">
                                 <span class="block text-[8px] font-mono-telemetry tracking-widest text-red-400 uppercase font-black">Target Prelist</span>
                                 <span id="pmlSisaTargetValue" class="target-static text-xl sm:text-2xl font-black font-mono-telemetry">0</span>
@@ -417,6 +427,16 @@
                                 </div>
                                 <div class="w-2.5 h-6 bg-amber-500/20 rounded-full overflow-hidden flex flex-col justify-end border border-amber-400/60">
                                     <div id="pclPercentageBar" class="w-full bg-amber-400 shadow-[0_0_8px_#fbbf24]" style="height: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/90 px-3 py-2 rounded-xl border border-sky-500/50 shadow-[0_0_12px_rgba(56,189,248,0.3)] text-center flex items-center space-x-2">
+                                <div class="text-right">
+                                    <span class="block text-[8px] font-mono-telemetry tracking-widest text-sky-400 uppercase font-black">% +Draft</span>
+                                    <span id="pclDraftPercentageValue" class="text-xs sm:text-sm font-black font-mono-telemetry text-sky-300">0%</span>
+                                </div>
+                                <div class="w-2.5 h-6 bg-sky-500/20 rounded-full overflow-hidden flex flex-col justify-end border border-sky-400/60">
+                                    <div id="pclDraftPercentageBar" class="w-full bg-sky-400 shadow-[0_0_8px_#38bdf8]" style="height: 0%;"></div>
                                 </div>
                             </div>
 
@@ -531,8 +551,11 @@
                     (h.includes('jumlah') && h.includes('didata') && h.includes('draft')) ||
                     h.includes('didata + draft') ||
                     h.includes('didata+draft');
+                
+                const isPersentaseDidataDraft = 
+                    h.includes('%') && h.includes('didata') && h.includes('draft');
 
-                return !isJumlahDidataDraft;
+                return !isJumlahDidataDraft && !isPersentaseDidataDraft;
             });
         }
 
@@ -753,6 +776,9 @@
                 let didataVal = parseNum(item.didata ?? item.respondenDidata ?? 0);
                 let targetPrelistVal = parseNum(item.targetPrelist ?? item.target ?? 0);
 
+                let draftPctRaw = item.progressDraftVal || 0;
+                let draftPctStr = item.progressDraft || '0%';
+
                 if (item.rawCells && Array.isArray(item.rawCells)) {
                     item.rawCells.forEach((cell) => {
                         const hLower = (cell.header || '').toLowerCase();
@@ -800,13 +826,17 @@
                         `;
                     });
                 }
-
                 pmlTitle.innerText = item.name || '—';
                 pmlValue.innerText = didataVal.toLocaleString('id-ID');
 
                 const pmlPct = targetPrelistVal > 0 ? (didataVal / targetPrelistVal) * 100 : 0;
                 pmlPctVal.innerText = `${pmlPct.toFixed(1)}%`;
                 pmlPctBar.style.height = `${Math.min(Math.max(pmlPct, 0), 100)}%`;
+
+                const pmlDraftPctValEl = document.getElementById('pmlDraftPercentageValue');
+                const pmlDraftPctBarEl = document.getElementById('pmlDraftPercentageBar');
+                if (pmlDraftPctValEl) pmlDraftPctValEl.innerText = draftPctStr;
+                if (pmlDraftPctBarEl) pmlDraftPctBarEl.style.height = `${Math.min(Math.max(draftPctRaw, 0), 100)}%`;
 
                 const pmlTargetPrelist = Math.max(targetPrelistVal, 0);
                 pmlSisa.innerText = pmlTargetPrelist.toLocaleString('id-ID');
@@ -846,6 +876,9 @@
 
                 let didataVal = parseNum(item.didata ?? item.respondenDidata ?? 0);
                 let targetPrelistVal = parseNum(item.targetPrelist ?? item.target ?? 0);
+
+                let draftPctRaw = item.progressDraftVal || 0;
+                let draftPctStr = item.progressDraft || '0%';
 
                 if (item.rawCells && Array.isArray(item.rawCells)) {
                     item.rawCells.forEach((cell) => {
@@ -899,26 +932,26 @@
                 pclValue.innerText = didataVal.toLocaleString('id-ID');
 
                 const pclPct = targetPrelistVal > 0 ? (didataVal / targetPrelistVal) * 100 : 0;
-                const pclPctRounded = Number(pclPct.toFixed(1));
-                const plusDidataValue = parseNum(item.harian ?? item.plusDidata ?? 0);
+                pclPctVal.innerText = `${pclPct.toFixed(1)}%`;
+                pclPctBar.style.height = `${Math.min(Math.max(pclPct, 0), 100)}%`;
 
-                pclPctVal.innerText = `${pclPctRounded}%`;
-                pclPctBar.style.height = `${Math.min(Math.max(pclPctRounded, 0), 100)}%`;
+                const pclDraftPctValEl = document.getElementById('pclDraftPercentageValue');
+                const pclDraftPctBarEl = document.getElementById('pclDraftPercentageBar');
+                if (pclDraftPctValEl) pclDraftPctValEl.innerText = draftPctStr;
+                if (pclDraftPctBarEl) pclDraftPctBarEl.style.height = `${Math.min(Math.max(draftPctRaw, 0), 100)}%`;
+
+                let plusDidata = item.harian || 0;
+                pclProgHarianVal.innerText = `+${plusDidata}`;
 
                 const pclTargetPrelist = Math.max(targetPrelistVal, 0);
                 pclSisa.innerText = pclTargetPrelist.toLocaleString('id-ID');
                 if (pclSisaMob) pclSisaMob.innerText = pclTargetPrelist.toLocaleString('id-ID');
-
                 pclSisa.classList.add('target-static');
                 if (pclSisaMob) pclSisaMob.classList.add('target-static');
 
-                if (pclProgHarianVal) {
-                    pclProgHarianVal.innerText = plusDidataValue.toLocaleString('id-ID');
-                }
-
-                applyPclStatusByProgress(pclPctRounded, plusDidataValue);
-
                 pclGrid.innerHTML = gridHtml || '<div class="col-span-full text-center text-xs text-slate-500 italic">Tidak ada rincian data</div>';
+
+                applyPclStatusByProgress(pclPct, plusDidata);
             };
 
             pclSelect.addEventListener('change', () => {
@@ -926,14 +959,18 @@
                 if (val === '') {
                     pclPlace.classList.remove('hidden');
                     pclCont.classList.add('hidden');
-                    hidePclAlarm();
                     hidePclWarning();
+                    hidePclAlarm();
                     stopEmergencyAlarm();
                     return;
                 }
-
                 renderPclCard(parseInt(val, 10));
             });
+
+            if (pclSelect.options.length > 1) {
+                pclSelect.value = pclSelect.options[1].value;
+                renderPclCard(parseInt(pclSelect.value, 10));
+            }
         }
     </script>
 </body>
