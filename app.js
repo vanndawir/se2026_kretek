@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // Inisialisasi Gemini AI (Menggunakan API Key Anda)
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'AQ.Ab8RN6LpDE...' });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || });
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
