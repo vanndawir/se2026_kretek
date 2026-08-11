@@ -2,11 +2,33 @@ const express = require('express');
 const { google } = require('googleapis');
 const xlsx = require('xlsx');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Inisialisasi Database SQLite untuk Curhat Lapangan
+const db = new sqlite3.Database(path.join(__dirname, 'chat.db'), (err) => {
+    if (err) {
+        console.error('❌ Gagal terhubung ke database:', err.message);
+    } else {
+        console.log('✅ Berhasil terhubung ke database SQLite (chat.db).');
+    }
+});
+
+// Buat tabel chats jika belum ada
+db.run(`CREATE TABLE IF NOT EXISTS chats (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender TEXT,
+    message TEXT,
+    timestamp TEXT
+)`);
 
 // ID Folder Utama Google Drive
 const MAIN_FOLDER_ID = '1kyl4AOQCfu8r1c4qDMZZF28bxWU2dO17';
@@ -38,9 +60,6 @@ const parseStrictNumber = (val) => {
     return parseInt(str, 10) || 0;
 };
 
-// ==========================================
-// MESIN SCANNER VERTIKAL (ANTI MERGED-CELLS)
-// ==========================================
 const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
     let maxCols = 0;
     const maxRowsToScan = Math.min(rows.length, 15);
@@ -66,7 +85,6 @@ const getBulletproofColIndex = (rows, exactKeywords, partialKeywords = []) => {
     return -1;
 };
 
-// Pencari Nama Petugas yang Akurat
 const getValidName = (r) => {
     if (r[1] !== undefined) {
         let val = String(r[1]).trim();
@@ -81,7 +99,6 @@ const getValidName = (r) => {
     return '';
 };
 
-// Fungsi penarik data Excel mentah (Rows)
 const fetchExcelRows = async (folderId, keywords) => {
     if (!drive) return [];
     
@@ -103,10 +120,7 @@ const fetchExcelRows = async (folderId, keywords) => {
         files.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
         let matchedFile = files.find(f => keywords.some(kw => f.name && f.name.toLowerCase().includes(kw.toLowerCase())));
 
-        if (!matchedFile) {
-            console.warn(`⚠️ File [${keywords.join(', ')}] tidak ditemukan.`);
-            return [];
-        }
+        if (!matchedFile) return [];
 
         const fileId = matchedFile.id;
         const mimeType = matchedFile.mimeType;
@@ -125,7 +139,6 @@ const fetchExcelRows = async (folderId, keywords) => {
         const wb = xlsx.read(buffer, { type: 'buffer' });
         return xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }) || [];
     } catch (err) {
-        console.error(`⚠️ Gagal baca file [${keywords.join(', ')}]:`, err.message);
         return [];
     }
 };
@@ -146,8 +159,7 @@ const parseDesaData = (rows) => {
         return {
             name,
             target: tVal,
-            didata: dVal,
-            'Target Prelist Awal pada kolom index ke-5 (kolom F)': Math.max(0, tVal - dVal)
+            didata: dVal
         };
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
@@ -202,7 +214,6 @@ const parsePetugas = (rows, role) => {
         let didataDraftVal = parseStrictNumber(r[didataDraftIdx]);
         if (didataDraftVal < didataVal) didataDraftVal = didataVal;
 
-        // Membaca % Didata langsung dari Excel
         let rawPct = r[pctIdx];
         let formattedPct = '0.0%';
         let numericPct = 0;
@@ -220,52 +231,35 @@ const parsePetugas = (rows, role) => {
             formattedPct = numericPct.toFixed(1) + '%';
         }
 
-        // ========================================================
-        // BACA MUTLAK KOLOM K (INDEX 10) UNTUK % DIDATA + DRAFT
-        // Tanpa tebakan AI, hanya merubah desimal excel menjadi %
-        // ========================================================
-        let rawPctDraft = r[10]; // Pastikan mengunci ke Kolom K
+        let rawPctDraft = r[10];
         let formattedPctDraft = '0.0%';
         let numericPctDraft = 0;
 
         if (rawPctDraft !== undefined && rawPctDraft !== null && rawPctDraft !== '' && rawPctDraft !== '-') {
             let strVal = String(rawPctDraft).trim();
             let num = parseFloat(strVal.replace('%', '').replace(',', '.'));
-            
             if (!isNaN(num)) {
-                // Di Excel, jika sebuah sel berformat '%', nilai mentahnya disimpan sebagai desimal (misal 107.04% = 1.0704)
-                // Kita kembalikan desimal itu menjadi angka persen yang normal.
                 if (typeof rawPctDraft === 'number' && !strVal.includes('%')) {
                     numericPctDraft = num * 100;
                 } else {
-                    // Jika teks sudah memiliki simbol '%' dari sananya atau diketik sebagai string teks murni
                     numericPctDraft = num;
                 }
                 formattedPctDraft = numericPctDraft.toFixed(1) + '%';
             } else {
-                formattedPctDraft = strVal; // Jika aneh, tampilkan teks apa adanya
+                formattedPctDraft = strVal;
             }
         }
-        // ========================================================
 
         let rowObj = { 
             name, 
             target: targetVal, 
-            targetPrelist: targetVal,
             didata: didataVal, 
-            realisasi: didataVal,
-            respondenDidata: didataVal,
             harian: harianVal, 
             progress: formattedPct,
             progressVal: numericPct,
-            persentase: formattedPct,
             didataDraft: didataDraftVal,
             progressDraft: formattedPctDraft,
             progressDraftVal: numericPctDraft,
-            persentaseDidataDraft: formattedPctDraft,
-            persentaseDidataDraftVal: numericPctDraft,
-            'Target Prelist Awal dari spreadsheet index ke-5': targetVal,
-            'Target Prelist Awal pada kolom index ke-5 (kolom F)': targetVal,
             rawCells: []
         };
         
@@ -280,6 +274,35 @@ const parsePetugas = (rows, role) => {
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
 
+// Konfigurasi Socket.io & SQLite Chat Handling
+io.on('connection', (socket) => {
+    db.all(`SELECT * FROM (SELECT * FROM chats ORDER BY id DESC LIMIT 50) ORDER BY id ASC`, [], (err, rows) => {
+        if (!err) {
+            socket.emit('init_chat', rows);
+        } else {
+            socket.emit('init_chat', []);
+        }
+    });
+
+    socket.on('send_message', (data) => {
+        const sender = data.sender || 'Petugas Anonim';
+        const message = data.message;
+        const timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+        db.run(`INSERT INTO chats (sender, message, timestamp) VALUES (?, ?, ?)`, [sender, message, timestamp], function(err) {
+            if (!err) {
+                const messageData = {
+                    id: this.lastID,
+                    sender,
+                    message,
+                    timestamp
+                };
+                io.emit('new_message', messageData);
+            }
+        });
+    });
+});
+
 app.get('/', async (req, res) => {
     let activeDate = '2026-08-03';
     let persentaseKretek = '80.9';
@@ -291,30 +314,18 @@ app.get('/', async (req, res) => {
         if (drive) {
             let targetFolderId = MAIN_FOLDER_ID;
             try {
-                let folderRes;
-                try {
-                    folderRes = await drive.files.list({
-                        q: `'${MAIN_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-                        orderBy: 'name desc',
-                        pageSize: 10
-                    });
-                } catch (err) {
-                    folderRes = await drive.files.list({
-                        q: `mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-                        orderBy: 'name desc',
-                        pageSize: 10
-                    });
-                }
-
+                let folderRes = await drive.files.list({
+                    q: `'${MAIN_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+                    orderBy: 'name desc',
+                    pageSize: 10
+                });
                 const folders = folderRes.data.files || [];
                 if (folders.length > 0) {
                     const validFolder = folders.find(f => /^\d{4}-\d{2}-\d{2}$/.test(f.name.trim())) || folders[0];
                     activeDate = validFolder.name;
                     targetFolderId = validFolder.id;
                 }
-            } catch (e) {
-                console.error("Gagal mengambil folder:", e.message);
-            }
+            } catch (e) {}
 
             const [kecRows, desaRows, pmlRows, pclRows] = await Promise.all([
                 fetchExcelRows(targetFolderId, ['rekap_wilayah_kecamatan', 'kecamatan', 'kec']),
@@ -338,15 +349,8 @@ app.get('/', async (req, res) => {
             parsedDesa = parseDesaData(desaRows);
             detailedPml = parsePetugas(pmlRows, 'pml');
             detailedPcl = parsePetugas(pclRows, 'pcl');
-
-            if (detailedPcl.length > 0) {
-                topPcl = [...detailedPcl].sort((a, b) => b.harian - a.harian).slice(0, 5);
-                bottomPcl = [...detailedPcl].sort((a, b) => a.harian - b.harian).slice(0, 5);
-            }
         }
-    } catch (err) {
-        console.error("⚠️ Terjadi kendala saat memuat data:", err.message);
-    }
+    } catch (err) {}
 
     res.render('index', {
         activeDate, persentaseKretek, totalTargetKretek, totalDidataKretek,
@@ -354,6 +358,6 @@ app.get('/', async (req, res) => {
     });
 });
 
-app.listen(3000, () => {
+server.listen(3000, () => {
     console.log('🚀 Server berjalan sukses di http://localhost:3000');
 });
