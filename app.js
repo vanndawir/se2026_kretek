@@ -5,13 +5,19 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const sqlite3 = require('sqlite3').verbose();
+const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// Inisialisasi Gemini AI (Menggunakan API Key Anda)
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'AQ.Ab8RN6LpDE...' });
+
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Inisialisasi Database SQLite untuk Curhat Lapangan
 const db = new sqlite3.Database(path.join(__dirname, 'chat.db'), (err) => {
@@ -25,8 +31,9 @@ const db = new sqlite3.Database(path.join(__dirname, 'chat.db'), (err) => {
 // Buat tabel chats jika belum ada
 db.run(`CREATE TABLE IF NOT EXISTS chats (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sender TEXT,
+    name TEXT,
     message TEXT,
+    sender_type TEXT,
     timestamp TEXT
 )`);
 
@@ -274,7 +281,6 @@ const parsePetugas = (rows, role) => {
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
 
-// Konfigurasi Socket.io & SQLite Chat Handling
 io.on('connection', (socket) => {
     db.all(`SELECT * FROM (SELECT * FROM chats ORDER BY id DESC LIMIT 50) ORDER BY id ASC`, [], (err, rows) => {
         if (!err) {
@@ -287,17 +293,51 @@ io.on('connection', (socket) => {
     socket.on('send_message', (data) => {
         const sender = data.sender || 'Petugas Anonim';
         const message = data.message;
+        const senderType = data.sender_type || 'user'; 
         const timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-        db.run(`INSERT INTO chats (sender, message, timestamp) VALUES (?, ?, ?)`, [sender, message, timestamp], function(err) {
+        db.run(`INSERT INTO chats (name, message, sender_type, timestamp) VALUES (?, ?, ?, ?)`, [sender, message, senderType, timestamp], function(err) {
             if (!err) {
                 const messageData = {
                     id: this.lastID,
-                    sender,
+                    name: sender,
                     message,
+                    sender_type: senderType,
                     timestamp
                 };
                 io.emit('new_message', messageData);
+
+                if (senderType === 'user') {
+                    setTimeout(async () => {
+                        try {
+                            const response = await ai.models.generateContent({
+                                model: 'gemini-2.5-flash',
+                                contents: `Kamu adalah asisten virtual yang ramah, empatik, dan suportif untuk para petugas lapangan Sensus Ekonomi 2026 (SE2026) di Kapanewon Kretek, Bantul. Petugas menyampaikan kendala: "${message}". Berikan tanggapan yang menyemangati, solutif secara umum, dan gunakan bahasa Indonesia yang santai namun profesional.`
+                            });
+
+                            const aiReplyText = response.text || "Tetap semangat rekan data! Admin utama akan segera meninjau laporanmu.";
+                            const aiTimestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+                            db.run(
+                                `INSERT INTO chats (name, message, sender_type, timestamp) VALUES (?, ?, ?, ?)`,
+                                ['Asisten AI Kretek 🤖', aiReplyText, 'ai', aiTimestamp],
+                                function (aiErr) {
+                                    if (!aiErr) {
+                                        io.emit('new_message', {
+                                            id: this.lastID,
+                                            name: 'Asisten AI Kretek 🤖',
+                                            message: aiReplyText,
+                                            sender_type: 'ai',
+                                            timestamp: aiTimestamp
+                                        });
+                                    }
+                                }
+                            );
+                        } catch (aiError) {
+                            console.error("Gagal memproses Auto-Reply AI:", aiError);
+                        }
+                    }, 2000);
+                }
             }
         });
     });
