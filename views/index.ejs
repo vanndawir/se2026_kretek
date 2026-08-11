@@ -53,25 +53,13 @@
         }
 
         @keyframes plusOkBlink {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0.65;
-                transform: scale(1.04);
-            }
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.65; transform: scale(1.04); }
         }
 
         @keyframes plusLowBlink {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0.55;
-                transform: scale(1.08);
-            }
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.55; transform: scale(1.08); }
         }
 
         #pclAlarmPanel {
@@ -128,12 +116,8 @@
         }
 
         @keyframes warningScroll {
-            0% {
-                transform: translateX(100%);
-            }
-            100% {
-                transform: translateX(-100%);
-            }
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
     </style>
 </head>
@@ -473,11 +457,110 @@
                 </div>
             </div>
         </div>
+
+        <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-xl border-t-4 border-t-orange-500 flex flex-col space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-orange-400">Ruang Aspirasi & Keluh Kesah</p>
+                    <h2 class="text-base font-extrabold text-white mt-0.5">💬 Curhat Lapangan (Anonim)</h2>
+                </div>
+                <span class="bg-orange-500/20 text-orange-300 text-xs font-bold px-3 py-1 rounded-full border border-orange-500/30">
+                    Tanpa Login
+                </span>
+            </div>
+
+            <div id="chatContainer" class="bg-slate-950/80 rounded-xl p-4 h-64 overflow-y-auto border border-slate-800 flex flex-col space-y-3 font-sans text-sm">
+            </div>
+
+            <form id="chatForm" class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="chatSender" placeholder="Nama samaran (Opsional)" class="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500 sm:w-1/4">
+                <div class="flex flex-1 gap-2">
+                    <input type="text" id="chatMessage" placeholder="Tuliskan keluh kesah..." required class="flex-1 bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <button type="submit" class="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg transition transform hover:scale-105">
+                        Kirim
+                    </button>
+                </div>
+            </form>
+        </div>
     </main>
 
     <footer class="mt-12 py-6 text-center text-xs sm:text-sm font-bold text-amber-300 tracking-wider border-t border-orange-500/20 bg-slate-950/40 shadow-inner">
         Website by vanndawir • mentas siji mentas kabeh
     </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const chatContainer = document.getElementById('chatContainer');
+        const chatForm = document.getElementById('chatForm');
+        const chatMessage = document.getElementById('chatMessage');
+        const chatSender = document.getElementById('chatSender');
+
+        function appendMessage(data) {
+            const div = document.createElement('div');
+            
+            let bgClass = '';
+            let badgeText = '';
+            let badgeColor = '';
+
+            if (data.sender_type === 'admin') {
+                bgClass = 'ml-auto bg-green-950/40 border border-green-500/30 text-right';
+                badgeText = '🛡️ ' + data.sender;
+                badgeColor = 'text-green-400';
+            } else if (data.sender_type === 'ai') {
+                bgClass = 'mr-auto bg-sky-950/40 border border-sky-500/30 text-left';
+                badgeText = '🤖 ' + data.sender;
+                badgeColor = 'text-sky-400';
+            } else {
+                bgClass = 'mr-auto bg-orange-950/40 border border-orange-500/30 text-left';
+                badgeText = '🕵️‍♂️ ' + data.sender;
+                badgeColor = 'text-orange-400';
+            }
+
+            div.className = `flex flex-col space-y-1 p-2.5 rounded-xl max-w-[85%] ${bgClass}`;
+            div.innerHTML = `
+                <div class="flex items-center justify-between gap-2 text-[10px] ${badgeColor} font-bold">
+                    <span>${badgeText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>
+                    <span class="text-slate-500 font-mono">${data.timestamp}</span>
+                </div>
+                <p class="text-xs text-slate-200 break-words">${data.message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+            `;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        socket.on('init_chat', (messages) => {
+            chatContainer.innerHTML = '';
+            if (messages.length === 0) chatContainer.innerHTML = '<div class="text-center text-slate-500 italic text-xs my-auto">Belum ada curhatan hari ini.</div>';
+            else messages.forEach(msg => appendMessage(msg));
+        });
+
+        socket.on('new_message', (msg) => {
+            if (chatContainer.querySelector('.italic')) chatContainer.innerHTML = '';
+            appendMessage(msg);
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = chatMessage.value.trim();
+            if (!message) return;
+
+            const nameInput = chatSender.value.trim() || 'Petugas Anonim';
+            
+            let senderType = 'user';
+            if (nameInput.includes('3402030')) {
+                senderType = 'admin';
+            }
+
+            socket.emit('send_message', { 
+                sender: nameInput, 
+                message: message,
+                sender_type: senderType 
+            });
+            
+            chatMessage.value = '';
+        });
+    </script>
 
     <script>
         window.addEventListener('load', () => {
