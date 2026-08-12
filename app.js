@@ -39,7 +39,7 @@ db.run(`CREATE TABLE IF NOT EXISTS chats (
 )`);
 
 // ID Folder Utama Google Drive
-const MAIN_FOLDER_ID = '1kyl4AOQCfu8r1c4qDMZZF28bxWU2dO17';
+const MAIN_FOLDER_ID = '1kyI4AOQCfu8r1c4qDMZZF28bxWU2dO17';
 
 let drive;
 try {
