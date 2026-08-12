@@ -1,11 +1,13 @@
 {
   "name": "se2026-monitoring",
   "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-    "@google/genai": "latest",
+    "@google/genai": "^2.16.0",
     "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
