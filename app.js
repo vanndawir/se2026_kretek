@@ -6,14 +6,10 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const sqlite3 = require('sqlite3').verbose();
-const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-
-// Inisialisasi Gemini AI
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
@@ -50,10 +46,44 @@ try {
             scopes: ['https://www.googleapis.com/auth/drive.readonly']
         })
     });
-    console.log('✅ Konfigurasi Google Auth berhasil.');
+    console.log('✅ Konfigurasi Google Auth (Drive) berhasil.');
 } catch (e) {
-    console.error('❌ Gagal memuat service-account.json:', e.message);
+    console.error('❌ Gagal memuat service-account.json untuk Drive:', e.message);
 }
+
+// Konfigurasi Auth untuk Gemini AI via Service Account
+const aiAuth = new google.auth.GoogleAuth({
+    keyFile: path.join(__dirname, 'service-account.json'),
+    scopes: ['https://www.googleapis.com/auth/generative-language']
+});
+
+// Fungsi untuk memanggil Gemini AI menggunakan Token Service Account & fetch
+const generateAiReply = async (promptText) => {
+    try {
+        const client = await aiAuth.getClient();
+        const tokenResponse = await client.getAccessToken();
+        const accessToken = tokenResponse.token;
+
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: promptText }]
+                }]
+            })
+        });
+
+        const data = await response.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    } catch (err) {
+        console.error("❌ Gagal memproses AI:", err.message);
+        return null;
+    }
+};
 
 // Fungsi Parser Angka Mutlak
 const parseStrictNumber = (val) => {
@@ -153,7 +183,6 @@ const fetchExcelRows = async (folderId, keywords) => {
 
 const parseDesaData = (rows) => {
     if (!rows || rows.length === 0) return [];
-    let targetIdx = getBulletproofColIndex(rows, ['target', 'jumlahusaha']);
     let didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi', 'selesai']);
     
     let dataStartIdx = rows.findIndex((r, idx) => idx > 1 && r && (r[0] === 1 || String(r[0]).trim() === '1'));
@@ -162,12 +191,43 @@ const parseDesaData = (rows) => {
     return rows.slice(dataStartIdx).map(r => {
         let name = getValidName(r);
         if (!name) return null;
-        let tVal = targetIdx !== -1 ? parseStrictNumber(r[targetIdx]) : 0;
+        let tVal = parseStrictNumber(r[3]) + parseStrictNumber(r[4]);
         let dVal = didataIdx !== -1 ? parseStrictNumber(r[didataIdx]) : 0;
+
+        let rawCapaian = r[8];
+        let capaianVal = 0;
+        if (rawCapaian !== undefined && rawCapaian !== null && rawCapaian !== '' && rawCapaian !== '-') {
+            let strVal = String(rawCapaian).trim().replace('%', '');
+            let num = parseFloat(strVal.replace(',', '.'));
+            if (!isNaN(num)) {
+                capaianVal = (typeof rawCapaian === 'number' && rawCapaian <= 1 && !String(rawCapaian).includes('%')) ? num * 100 : num;
+            }
+        } else if (tVal > 0) {
+            capaianVal = (dVal / tVal) * 100;
+        }
+
+        let rawDraft = r[12];
+        let draftStr = '0.00%';
+        if (rawDraft !== undefined && rawDraft !== null && rawDraft !== '') {
+            let strVal = String(rawDraft).trim();
+            let num = parseFloat(strVal.replace('%', '').replace(',', '.'));
+            if (!isNaN(num)) {
+                if (typeof rawDraft === 'number' && rawDraft <= 1 && !strVal.includes('%')) {
+                    draftStr = (num * 100).toFixed(2) + '%';
+                } else {
+                    draftStr = strVal.includes('%') ? strVal : strVal + '%';
+                }
+            } else {
+                draftStr = strVal;
+            }
+        }
+
         return {
             name,
             target: tVal,
-            didata: dVal
+            didata: dVal,
+            capaian: capaianVal,
+            draftStr
         };
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
@@ -178,23 +238,22 @@ const parsePetugas = (rows, role) => {
     let dataStartIdx = rows.findIndex((r, idx) => idx > 1 && r && (r[0] === 1 || String(r[0]).trim() === '1'));
     if (dataStartIdx === -1) dataStartIdx = 3;
 
-    let targetIdx = getBulletproofColIndex(rows, ['target', 'prelist'], ['beban']);
+    let targetIdx = 5; 
     let didataIdx = getBulletproofColIndex(rows, ['respondendidata', 'realisasi'], ['didata']);
     let harianIdx = getBulletproofColIndex(rows, ['+didata', 'harian'], ['+']);
-    let pctIdx = getBulletproofColIndex(rows, ['%didata', 'persentasedidata'], ['%']);
+    let pctIdx = 10; 
     let didataDraftIdx = getBulletproofColIndex(rows, ['didatadraft', 'didata+draft'], ['draft']);
 
-    if (targetIdx === -1) targetIdx = 5;
     if (didataIdx === -1) didataIdx = 6;
     if (harianIdx === -1) harianIdx = 7;
-    if (pctIdx === -1) pctIdx = 8;
-    if (didataDraftIdx === -1) didataDraftIdx = 9;
+    if (didataDraftIdx === -1) didataDraftIdx = 11;
 
     let compositeHeaders = [];
     let maxCols = 0;
-    for (let r = 0; r < dataStartIdx; r++) {
+    for (let r = 0; r < Math.min(rows.length, 20); r++) {
         if (rows[r] && rows[r].length > maxCols) maxCols = rows[r].length;
     }
+    if (maxCols < 21) maxCols = 21;
 
     for (let c = 0; c < maxCols; c++) {
         let parts = [];
@@ -205,7 +264,7 @@ const parsePetugas = (rows, role) => {
             }
         }
         if (c === targetIdx) compositeHeaders[c] = 'Target Prelist';
-        else if (c === didataIdx) compositeHeaders[c] = 'Responden Didata';
+        else if (c === didataIdx) compositeHeaders[c] = 'USAHA BKU & KELUARGA DITEMUKAN/BARU/FORCE SUBMIT';
         else if (c === harianIdx) compositeHeaders[c] = '+ Didata';
         else if (c === pctIdx) compositeHeaders[c] = '% Didata';
         else if (c === didataDraftIdx) compositeHeaders[c] = 'Didata + Draft';
@@ -216,43 +275,43 @@ const parsePetugas = (rows, role) => {
         let name = getValidName(r);
         if (!name) return null;
 
-        let targetVal = parseStrictNumber(r[targetIdx]);
+        let targetVal = parseStrictNumber(r[5]) + parseStrictNumber(r[6]);
         let didataVal = parseStrictNumber(r[didataIdx]);
         let harianVal = parseStrictNumber(r[harianIdx]);
         let didataDraftVal = parseStrictNumber(r[didataDraftIdx]);
         if (didataDraftVal < didataVal) didataDraftVal = didataVal;
 
-        let rawPct = r[pctIdx];
-        let formattedPct = '0.0%';
+        let rawPct = r[10];
+        let formattedPct = '0.00%';
         let numericPct = 0;
 
         if (rawPct !== undefined && rawPct !== null && rawPct !== '' && rawPct !== '-') {
             let strPct = String(rawPct).trim().replace('%', '');
             let num = parseFloat(strPct.replace(',', '.'));
             if (!isNaN(num)) {
-                numericPct = num <= 1 ? num * 100 : num;
+                numericPct = (typeof rawPct === 'number' && rawPct <= 1 && !String(rawPct).includes('%')) ? num * 100 : num;
                 if (numericPct > 100) numericPct = 100;
-                formattedPct = numericPct.toFixed(1) + '%';
+                formattedPct = numericPct.toFixed(2) + '%';
             }
         } else if (targetVal > 0) {
             numericPct = Math.min(100, (didataVal / targetVal) * 100);
-            formattedPct = numericPct.toFixed(1) + '%';
+            formattedPct = numericPct.toFixed(2) + '%';
         }
 
-        let rawPctDraft = r[10];
-        let formattedPctDraft = '0.0%';
+        let rawPctDraft = r[14];
+        let formattedPctDraft = '0.00%';
         let numericPctDraft = 0;
 
         if (rawPctDraft !== undefined && rawPctDraft !== null && rawPctDraft !== '' && rawPctDraft !== '-') {
             let strVal = String(rawPctDraft).trim();
             let num = parseFloat(strVal.replace('%', '').replace(',', '.'));
             if (!isNaN(num)) {
-                if (typeof rawPctDraft === 'number' && !strVal.includes('%')) {
+                if (typeof rawPctDraft === 'number' && rawPctDraft <= 1 && !strVal.includes('%')) {
                     numericPctDraft = num * 100;
                 } else {
                     numericPctDraft = num;
                 }
-                formattedPctDraft = numericPctDraft.toFixed(1) + '%';
+                formattedPctDraft = numericPctDraft.toFixed(2) + '%';
             } else {
                 formattedPctDraft = strVal;
             }
@@ -271,7 +330,7 @@ const parsePetugas = (rows, role) => {
             rawCells: []
         };
         
-        for (let idx = 11; idx <= 16; idx++) {
+        for (let idx = 15; idx <= 20; idx++) {
             let h = compositeHeaders[idx] || `Kolom_${idx}`;
             let rawVal = (idx < r.length && r[idx] !== undefined && r[idx] !== null) ? r[idx] : '-';
             let val = (rawVal !== '-' && !isNaN(rawVal)) ? parseStrictNumber(rawVal) : rawVal;
@@ -282,7 +341,6 @@ const parsePetugas = (rows, role) => {
     }).filter(item => item && item.name.toLowerCase() !== 'jumlah' && item.name.toLowerCase() !== 'total');
 };
 
-// Simpan referensi timer AI per socket
 const activeAiTimers = {};
 
 io.on('connection', (socket) => {
@@ -315,7 +373,6 @@ io.on('connection', (socket) => {
             };
             io.emit('new_message', messageData);
 
-            // CEK APAKAH ADMIN
             const isAdmin = senderType === 'admin' || sender.includes('3402030') || message.includes('3402030');
 
             if (isAdmin) {
@@ -330,12 +387,9 @@ io.on('connection', (socket) => {
 
                 activeAiTimers[socket.id] = setTimeout(async () => {
                     try {
-                        const response = await ai.models.generateContent({
-                            model: 'gemini-2.5-flash',
-                            contents: `Kamu adalah asisten virtual yang ramah, empatik, dan suportif untuk para petugas lapangan Sensus Ekonomi 2026 (SE2026) di Kapanewon Kretek, Bantul. Petugas menyampaikan kendala: "${message}". Berikan tanggapan yang menyemangati, solutif secara umum, dan gunakan bahasa Indonesia yang santai namun profesional.`
-                        });
-
-                        const aiReplyText = response.text || "Tetap semangat rekan data! Admin utama akan segera meninjau laporanmu.";
+                        const promptText = `Kamu adalah asisten virtual yang ramah, empatik, dan suportif untuk para petugas lapangan Sensus Ekonomi 2026 (SE2026) di Kapanewon Kretek, Bantul. Petugas menyampaikan kendala: "${message}". Berikan tanggapan yang menyemangati, solutif secara umum, dan gunakan bahasa Indonesia yang santai namun profesional.`;
+                        
+                        const aiReplyText = await generateAiReply(promptText) || "Tetap semangat rekan data! Admin utama akan segera meninjau laporanmu.";
                         const aiTimestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
                         db.run(
@@ -374,6 +428,7 @@ io.on('connection', (socket) => {
 app.get('/', async (req, res) => {
     let activeDate = '2026-08-03';
     let persentaseKretek = '80.9';
+    let persentaseDraftKretek = '0.0%';
     let totalTargetKretek = 14764;
     let totalDidataKretek = 11939;
     let topPcl = [], bottomPcl = [], parsedDesa = [], detailedPml = [], detailedPcl = [];
@@ -410,7 +465,40 @@ app.get('/', async (req, res) => {
                 if (kretekRow) {
                     totalTargetKretek = targetIdx !== -1 ? parseStrictNumber(kretekRow[targetIdx]) : 14764;
                     totalDidataKretek = didataIdx !== -1 ? parseStrictNumber(kretekRow[didataIdx]) : 11939;
-                    if (totalTargetKretek > 0) persentaseKretek = ((totalDidataKretek / totalTargetKretek) * 100).toFixed(1);
+
+                    let rawLiveGauge = kretekRow[8];
+                    if (rawLiveGauge !== undefined && rawLiveGauge !== null && rawLiveGauge !== '') {
+                        let strVal = String(rawLiveGauge).trim();
+                        let num = parseFloat(strVal.replace('%', '').replace(',', '.'));
+                        if (!isNaN(num)) {
+                            if (typeof rawLiveGauge === 'number' && rawLiveGauge <= 1 && !strVal.includes('%')) {
+                                persentaseKretek = (num * 100).toFixed(2);
+                            } else {
+                                persentaseKretek = strVal.replace('%', '');
+                            }
+                        } else {
+                            persentaseKretek = strVal.replace('%', '');
+                        }
+                    } else if (totalTargetKretek > 0) {
+                        persentaseKretek = ((totalDidataKretek / totalTargetKretek) * 100).toFixed(2);
+                    }
+
+                    let rawDraft = kretekRow[12];
+                    if (rawDraft !== undefined && rawDraft !== null && rawDraft !== '') {
+                        let strVal = String(rawDraft).trim();
+                        let num = parseFloat(strVal.replace('%', '').replace(',', '.'));
+                        if (!isNaN(num)) {
+                            if (typeof rawDraft === 'number' && rawDraft <= 1 && !strVal.includes('%')) {
+                                persentaseDraftKretek = (num * 100).toFixed(2) + '%';
+                            } else {
+                                persentaseDraftKretek = strVal.includes('%') ? strVal : strVal + '%';
+                            }
+                        } else {
+                            persentaseDraftKretek = strVal;
+                        }
+                    } else {
+                        persentaseDraftKretek = '0.0%';
+                    }
                 }
             }
 
@@ -424,7 +512,7 @@ app.get('/', async (req, res) => {
         if (err) chatRows = [];
 
         res.render('index', {
-            activeDate, persentaseKretek, totalTargetKretek, totalDidataKretek,
+            activeDate, persentaseKretek, persentaseDraftKretek, totalTargetKretek, totalDidataKretek,
             topPcl, bottomPcl, parsedDesa, detailedPml, detailedPcl,
             chats: chatRows
         });
